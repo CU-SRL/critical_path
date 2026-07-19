@@ -11,180 +11,175 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:     #000;
-      --border: #1e1e1e;
-      --text:   #fff;
-      --muted:  #4a4a4a;
-      --dim:    #242424;
+      --bg:    #000;
+      --brd:   #1e1e1e;
+      --text:  #fff;
+      --muted: #4a4a4a;
+      --dim:   #242424;
+      --green: #5dc87a;
     }
 
     html, body {
-      height: 100%;
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Inter', sans-serif;
-      font-weight: 300;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
+      height: 100%; background: var(--bg); color: var(--text);
+      font-family: 'Inter', sans-serif; font-weight: 300;
+      display: flex; flex-direction: column; overflow: hidden;
     }
 
     /* ── Header ── */
-    header {
-      flex-shrink: 0;
-      display: flex;
-      align-items: flex-end;
-      padding: 2.5rem 2.5rem 1.25rem;
-      border-bottom: 1px solid var(--border);
-    }
-    h1 { font-size: 1.55rem; font-weight: 300; letter-spacing: 0.2em; text-transform: uppercase; line-height: 1; }
-    .subtitle { margin-left: 1.25rem; padding-bottom: 0.1rem; font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+    header { flex-shrink:0; display:flex; align-items:flex-end; padding:2.5rem 2.5rem 1.25rem; border-bottom:1px solid var(--brd); }
+    h1 { font-size:1.55rem; font-weight:300; letter-spacing:.2em; text-transform:uppercase; line-height:1; }
+    .subtitle { margin-left:1.25rem; padding-bottom:.1rem; font-size:.65rem; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); }
 
     /* ── Tabs ── */
-    .tab-bar { flex-shrink: 0; display: flex; padding: 0 2.5rem; border-bottom: 1px solid var(--border); }
-    .tab-btn {
-      background: none; border: none; border-bottom: 1px solid transparent;
-      margin-bottom: -1px; padding: 0.7rem 1rem 0.65rem;
-      font-family: 'Inter', sans-serif; font-weight: 300; font-size: 0.58rem;
-      letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted);
-      cursor: pointer; transition: color 0.15s;
-    }
-    .tab-btn:hover:not(.active) { color: #888; }
-    .tab-btn.active { color: var(--text); border-bottom-color: var(--text); }
+    .tab-bar { flex-shrink:0; display:flex; padding:0 2.5rem; border-bottom:1px solid var(--brd); }
+    .tab-btn { background:none; border:none; border-bottom:1px solid transparent; margin-bottom:-1px; padding:.7rem 1rem .65rem; font-family:'Inter',sans-serif; font-weight:300; font-size:.58rem; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); cursor:pointer; transition:color .15s; }
+    .tab-btn:hover:not(.active) { color:#888; }
+    .tab-btn.active { color:var(--text); border-bottom-color:var(--text); }
 
-    main { flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
-    .tab-panel { display: none; flex: 1; flex-direction: column; overflow: hidden; min-height: 0; }
-    .tab-panel.active { display: flex; }
+    main { flex:1; overflow:hidden; display:flex; flex-direction:column; min-height:0; }
+    .tab-panel { display:none; flex:1; flex-direction:column; overflow:hidden; min-height:0; }
+    .tab-panel.active { display:flex; }
 
     /* ── Items tab ── */
-    .items-scroll { flex: 1; overflow-y: auto; padding: 0 2.5rem 1rem; }
+    .items-scroll { flex:1; overflow-y:auto; padding:0 2.5rem 1rem; }
 
-    .tbl { width: 100%; max-width: 920px; border-collapse: collapse; }
-    .tbl col.col-num { width: 110px; }
-    .tbl col.col-pred { width: 190px; }
-    .tbl col.col-icon { width: 1.75rem; }
+    .tbl { width:100%; max-width:960px; border-collapse:collapse; }
+    .tbl col.col-num  { width:110px; }
+    .tbl col.col-pred { width:185px; }
+    .tbl col.col-icon { width:1.75rem; }
 
-    .tbl thead th {
-      position: sticky; top: 0; background: var(--bg);
-      padding: 1.25rem 0 0.6rem; font-size: 0.55rem; font-weight: 400;
-      letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted);
-      text-align: left; border-bottom: 1px solid var(--border); z-index: 1;
-    }
-    .tbl th + th, .tbl td + td { padding-left: 1.25rem; }
-    .tbl tbody tr { border-bottom: 1px solid var(--border); }
+    .tbl thead th { position:sticky; top:0; background:var(--bg); padding:1.25rem 0 .6rem; font-size:.55rem; font-weight:400; letter-spacing:.22em; text-transform:uppercase; color:var(--muted); text-align:left; border-bottom:1px solid var(--brd); z-index:1; }
+    .tbl th+th, .tbl td+td { padding-left:1.25rem; }
+    .tbl tbody tr { border-bottom:1px solid var(--brd); }
     .tbl tbody tr:hover .del-btn,
-    .tbl tbody tr:hover .obj-btn:not(.active) { opacity: 1; }
-    .tbl td { padding: 0; vertical-align: middle; }
+    .tbl tbody tr:hover .obj-btn:not(.active),
+    .tbl tbody tr:hover .chk-btn:not(.active) { opacity:1; }
+    .tbl td { padding:0; vertical-align:middle; }
 
-    .cell-input {
-      width: 100%; background: transparent; border: none; outline: none;
-      color: var(--text); font-family: 'Inter', sans-serif; font-weight: 300;
-      font-size: 0.82rem; letter-spacing: 0.03em; padding: 0.72rem 0; caret-color: var(--text);
-    }
-    .cell-input::placeholder { color: var(--dim); }
-    .cell-input[type="number"] { -moz-appearance: textfield; }
+    .cell-input { width:100%; background:transparent; border:none; outline:none; color:var(--text); font-family:'Inter',sans-serif; font-weight:300; font-size:.82rem; letter-spacing:.03em; padding:.72rem 0; caret-color:var(--text); transition:opacity .2s; }
+    .cell-input::placeholder { color:var(--dim); }
+    .cell-input[type="number"] { -moz-appearance:textfield; }
     .cell-input[type="number"]::-webkit-outer-spin-button,
-    .cell-input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .cell-input[type="number"]::-webkit-inner-spin-button { -webkit-appearance:none; }
+
+    /* Complete row styling */
+    .tbl tbody tr.is-complete .cell-input { opacity:.35; }
+    .tbl tbody tr.is-complete td:first-child .cell-input { text-decoration:line-through; }
 
     /* Predecessor chips */
-    .pred-cell { display: flex; align-items: center; flex-wrap: wrap; gap: 0.3rem; padding: 0.4rem 0 0.4rem 1.25rem; min-height: 40px; }
-    .pred-chip { display: inline-flex; align-items: center; gap: 0.2rem; padding: 0.15rem 0.3rem 0.15rem 0.45rem; border: 1px solid #2a2a2a; font-size: 0.58rem; letter-spacing: 0.06em; color: #999; white-space: nowrap; }
-    .chip-remove { background: none; border: none; cursor: pointer; color: #444; font-size: 0.75rem; padding: 0 0.1rem; line-height: 1; transition: color 0.12s; }
-    .chip-remove:hover { color: var(--text); }
-    .add-pred-btn { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 1rem; font-weight: 300; padding: 0 0.1rem; line-height: 1; transition: color 0.12s; }
-    .add-pred-btn:hover { color: var(--text); }
+    .pred-cell { display:flex; align-items:center; flex-wrap:wrap; gap:.3rem; padding:.4rem 0 .4rem 1.25rem; min-height:40px; }
+    .pred-chip { display:inline-flex; align-items:center; gap:.2rem; padding:.15rem .3rem .15rem .45rem; border:1px solid #2a2a2a; font-size:.58rem; letter-spacing:.06em; color:#999; white-space:nowrap; }
+    .chip-remove { background:none; border:none; cursor:pointer; color:#444; font-size:.75rem; padding:0 .1rem; line-height:1; transition:color .12s; }
+    .chip-remove:hover { color:var(--text); }
+    .add-pred-btn { background:none; border:none; cursor:pointer; color:var(--muted); font-size:1rem; font-weight:300; padding:0 .1rem; line-height:1; transition:color .12s; }
+    .add-pred-btn:hover { color:var(--text); }
 
-    /* Objective & delete icon buttons */
-    .obj-btn, .del-btn {
-      background: none; border: none; cursor: pointer; color: var(--muted);
-      font-size: 0.85rem; font-weight: 300; padding: 0; opacity: 0;
-      transition: color 0.12s, opacity 0.15s; line-height: 1;
-    }
-    .obj-btn { font-size: 0.9rem; }
-    .obj-btn.active { color: var(--text); opacity: 1; }
-    .del-btn { font-size: 1rem; }
-    .obj-btn:hover { color: var(--text); }
-    .del-btn:hover { color: var(--text); }
+    /* Icon action buttons */
+    .chk-btn, .obj-btn, .del-btn { background:none; border:none; cursor:pointer; font-family:'Inter',sans-serif; font-weight:300; padding:0; opacity:0; transition:color .12s, opacity .15s; line-height:1; }
+    .chk-btn { font-size:.8rem; color:var(--muted); }
+    .obj-btn  { font-size:.85rem; color:var(--muted); }
+    .del-btn  { font-size:1rem;  color:var(--muted); }
+    .chk-btn.active { color:var(--green); opacity:1; }
+    .obj-btn.active  { color:var(--text); opacity:1; }
+    .chk-btn:hover, .obj-btn:hover, .del-btn:hover { color:var(--text); }
 
-    /* Objective row — marked item gets a subtle left accent */
-    .tbl tbody tr.is-objective td:first-child { border-left: 1px solid #333; padding-left: calc(1.25rem - 1px); }
+    /* Objective row marker */
+    .tbl tbody tr.is-objective td:first-child { border-left:1px solid #2e2e2e; }
 
     /* Objective date sub-row */
-    .obj-date-row td { padding: 0; border-bottom: 1px solid var(--border); }
-    .obj-date-cell {
-      display: flex; align-items: center; gap: 1.5rem;
-      padding: 0.5rem 0 0.7rem; border-top: 1px solid #111;
-    }
-    .obj-date-label { font-size: 0.54rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
-    .date-input {
-      background: transparent; border: none; outline: none;
-      color: var(--text); font-family: 'Inter', sans-serif; font-weight: 300;
-      font-size: 0.8rem; letter-spacing: 0.03em; padding: 0; cursor: pointer; color-scheme: dark;
-    }
+    .obj-date-row td { padding:0; border-bottom:1px solid var(--brd); }
+    .obj-date-cell { display:flex; align-items:center; gap:1.5rem; padding:.5rem 0 .7rem; border-top:1px solid #111; }
+    .obj-date-label { font-size:.54rem; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); white-space:nowrap; }
+    .date-input { background:transparent; border:none; outline:none; color:var(--text); font-family:'Inter',sans-serif; font-weight:300; font-size:.8rem; letter-spacing:.03em; padding:0; cursor:pointer; color-scheme:dark; }
 
     /* Add item */
-    .add-item-btn {
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      margin: 1rem 2.5rem 1.5rem; background: none; border: none; cursor: pointer;
-      color: var(--muted); font-family: 'Inter', sans-serif; font-weight: 300;
-      font-size: 0.58rem; letter-spacing: 0.22em; text-transform: uppercase;
-      padding: 0; transition: color 0.15s;
-    }
-    .add-item-btn:hover { color: var(--text); }
-    .add-item-btn .plus { font-size: 1.05rem; line-height: 1; }
+    .add-item-btn { display:inline-flex; align-items:center; gap:.5rem; margin:1rem 2.5rem 1.5rem; background:none; border:none; cursor:pointer; color:var(--muted); font-family:'Inter',sans-serif; font-weight:300; font-size:.58rem; letter-spacing:.22em; text-transform:uppercase; padding:0; transition:color .15s; }
+    .add-item-btn:hover { color:var(--text); }
+    .add-item-btn .plus { font-size:1.05rem; line-height:1; }
 
-    @keyframes rowIn { from { opacity: 0; } to { opacity: 1; } }
-    .tbl tbody tr { animation: rowIn 0.12s ease; }
+    @keyframes rowIn { from { opacity:0; } to { opacity:1; } }
+    .tbl tbody tr { animation:rowIn .12s ease; }
 
     /* ── Graph tab ── */
-    .graph-viewport { flex: 1; overflow: auto; position: relative; padding: 2.5rem; }
-    .placeholder-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 0.58rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); white-space: nowrap; pointer-events: none; }
-    #graph-svg { display: block; }
-    .g-node-rect { fill: #000; stroke: #2e2e2e; stroke-width: 1; }
-    .g-node-name { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 11px; fill: #ddd; }
-    .g-node-meta { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 10px; fill: #484848; }
-    .g-edge      { fill: none; stroke: #282828; stroke-width: 1.5; }
+    .graph-viewport { flex:1; overflow:auto; position:relative; padding:2.5rem; }
+    .placeholder-msg { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:.58rem; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); white-space:nowrap; pointer-events:none; }
+    #graph-svg { display:block; }
+    .g-node-rect      { fill:#000; stroke:#2a2a2a; stroke-width:1; }
+    .g-node-rect-crit { fill:#000; stroke:rgba(255,255,255,.35); stroke-width:1; }
+    .g-node-rect-done { fill:#000; stroke:#181818; stroke-width:1; }
+    .g-node-name      { font-family:'Inter',sans-serif; font-weight:300; font-size:11px; fill:#ddd; }
+    .g-node-name-done { font-family:'Inter',sans-serif; font-weight:300; font-size:11px; fill:#2e2e2e; }
+    .g-node-meta      { font-family:'Inter',sans-serif; font-weight:300; font-size:10px; fill:#484848; }
+    .g-edge           { fill:none; stroke:#242424; stroke-width:1.5; }
+    .g-edge-crit      { fill:none; stroke:rgba(255,255,255,.18); stroke-width:1.5; }
 
     /* ── Calendar tab ── */
-    .cal-viewport { flex: 1; overflow: auto; position: relative; }
-    #cal-svg { display: block; }
+    .cal-legend { flex-shrink:0; display:flex; align-items:center; gap:1.75rem; padding:.65rem 2.5rem; border-bottom:1px solid var(--brd); font-size:.54rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+    .zoom-ctrl { display:flex; align-items:center; gap:.45rem; margin-left:auto; }
+    .zoom-btn { background:none; border:1px solid var(--brd); color:var(--muted); font-size:.9rem; font-weight:300; width:1.35rem; height:1.35rem; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:color .12s,border-color .12s; padding:0; line-height:1; }
+    .zoom-btn:hover { color:var(--text); border-color:#3a3a3a; }
+    .zoom-pct { font-size:.54rem; letter-spacing:.1em; color:var(--muted); width:2.6rem; text-align:center; }
+    .leg { display:flex; align-items:center; gap:.45rem; }
+    .leg-sw { width:14px; height:6px; border-radius:1px; flex-shrink:0; }
 
-    /* Calendar SVG classes */
-    .c-weekend   { fill: #060606; }
-    .c-past-col  { fill: #050505; }
-    .c-grid-v    { stroke: #141414; stroke-width: 1; }
-    .c-grid-vwk  { stroke: #222; stroke-width: 1; }
-    .c-grid-h    { stroke: #141414; stroke-width: 1; }
-    .c-today     { stroke: #3a3a3a; stroke-width: 1; stroke-dasharray: 3 3; }
-    .c-target    { stroke: rgba(255,255,255,0.25); stroke-width: 1; }
-    .c-month     { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 8px;  fill: #383838; letter-spacing: 0.14em; text-transform: uppercase; }
-    .c-day       { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 10px; fill: #505050; }
-    .c-day-past  { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 10px; fill: #2d2d2d; }
-    .c-dow       { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 7px;  fill: #2d2d2d; letter-spacing: 0.08em; }
-    .c-name      { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 11px; fill: #bbb; }
-    .c-name-dim  { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 11px; fill: #333; }
-    .c-marker    { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 7px;  letter-spacing: 0.14em; text-transform: uppercase; }
-    /* Bars */
-    .c-bar-crit  { fill: rgba(255,255,255,0.88); }
-    .c-bar-norm  { fill: rgba(255,255,255,0.28); }
-    .c-bar-late-crit { fill: rgba(255,80,80,0.65); }
-    .c-bar-late-norm { fill: rgba(255,80,80,0.22); }
-    .c-float     { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 1; stroke-dasharray: 3 3; }
+    .cal-viewport { flex:1; overflow:auto; position:relative; }
+    #cal-svg { display:block; }
+
+    .c-weekend      { fill:#060606; }
+    .c-past-col     { fill:#040404; }
+    .c-grid-v       { stroke:#141414; stroke-width:1; }
+    .c-grid-vwk     { stroke:#1e1e1e; stroke-width:1; }
+    .c-grid-vmo     { stroke:#2a2a2a; stroke-width:1; }
+    .c-grid-h       { stroke:#141414; stroke-width:1; }
+    .c-today        { stroke:#383838; stroke-width:1; stroke-dasharray:3 3; }
+    .c-target       { stroke:rgba(255,255,255,.22); stroke-width:1; }
+    .c-month        { font-family:'Inter',sans-serif; font-weight:300; font-size:8px;  fill:#383838; letter-spacing:.14em; text-transform:uppercase; }
+    .c-day          { font-family:'Inter',sans-serif; font-weight:300; font-size:10px; fill:#505050; }
+    .c-day-past     { font-family:'Inter',sans-serif; font-weight:300; font-size:10px; fill:#2d2d2d; }
+    .c-dow          { font-family:'Inter',sans-serif; font-weight:300; font-size:7px;  fill:#2d2d2d; letter-spacing:.08em; }
+    .c-name         { font-family:'Inter',sans-serif; font-weight:300; font-size:11px; fill:#bbb; }
+    .c-name-dim     { font-family:'Inter',sans-serif; font-weight:300; font-size:11px; fill:#2d2d2d; }
+    .c-marker       { font-family:'Inter',sans-serif; font-weight:300; font-size:7px;  letter-spacing:.14em; text-transform:uppercase; }
+
+    /* Bar classes */
+    .c-bar-crit      { fill:rgba(255,255,255,.9); }
+    .c-bar-norm      { fill:rgba(255,255,255,.25); }
+    .c-bar-over-crit { fill:rgba(255,80,55,.8); }
+    .c-bar-over-norm { fill:rgba(255,80,55,.25); }
+    .c-bar-done      { fill:rgba(93,200,122,.22); stroke:rgba(93,200,122,.35); stroke-width:1; }
+    .c-float         { fill:none; stroke:rgba(255,255,255,.08); stroke-width:1; stroke-dasharray:3 3; }
 
     /* ── Picker ── */
-    #picker-backdrop { position: fixed; inset: 0; z-index: 99; }
-    #picker { position: fixed; z-index: 100; background: #060606; border: 1px solid #2a2a2a; min-width: 190px; max-height: 230px; overflow-y: auto; padding: 0.2rem 0; }
-    .picker-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.45rem 0.8rem; font-size: 0.73rem; font-weight: 300; color: #777; cursor: pointer; letter-spacing: 0.03em; user-select: none; }
-    .picker-row:hover { color: var(--text); background: #111; }
-    .picker-row.selected { color: var(--text); }
-    .picker-row.cyclic { color: #2e2e2e; cursor: default; }
-    .picker-row.cyclic:hover { color: #2e2e2e; background: transparent; }
-    .picker-check { width: 0.8rem; font-size: 0.6rem; flex-shrink: 0; }
-    .picker-empty { padding: 0.5rem 0.8rem; font-size: 0.68rem; color: #333; letter-spacing: 0.06em; }
+    #picker-backdrop { position:fixed; inset:0; z-index:99; }
+    #picker { position:fixed; z-index:100; background:#060606; border:1px solid #2a2a2a; min-width:190px; max-height:230px; overflow-y:auto; padding:.2rem 0; }
+    .picker-row { display:flex; align-items:center; gap:.5rem; padding:.45rem .8rem; font-size:.73rem; font-weight:300; color:#777; cursor:pointer; letter-spacing:.03em; user-select:none; }
+    .picker-row:hover { color:var(--text); background:#111; }
+    .picker-row.selected { color:var(--text); }
+    .picker-row.cyclic { color:#2e2e2e; cursor:default; }
+    .picker-row.cyclic:hover { color:#2e2e2e; background:transparent; }
+    .picker-check { width:.8rem; font-size:.6rem; flex-shrink:0; }
+    .picker-empty { padding:.5rem .8rem; font-size:.68rem; color:#333; letter-spacing:.06em; }
+
+    /* ── Header actions ── */
+    .header-actions { margin-left:auto; display:flex; gap:.6rem; align-items:center; }
+    .proj-name-input { background:transparent; border:none; border-bottom:1px solid #2a2a2a; outline:none; color:var(--muted); font-family:'Inter',sans-serif; font-weight:300; font-size:.65rem; letter-spacing:.06em; padding:.15rem .25rem; width:130px; transition:color .15s,border-color .15s; }
+    .proj-name-input:focus { color:var(--text); border-bottom-color:#444; }
+    .hdr-btn { background:none; border:1px solid var(--brd); color:var(--muted); font-family:'Inter',sans-serif; font-weight:300; font-size:.54rem; letter-spacing:.2em; text-transform:uppercase; padding:.28rem .7rem; cursor:pointer; transition:color .15s,border-color .15s; }
+    .hdr-btn:hover { color:var(--text); border-color:#3a3a3a; }
+
+    /* ── Open-project panel ── */
+    #open-backdrop { position:fixed; inset:0; z-index:99; }
+    #open-panel { position:fixed; z-index:100; background:#060606; border:1px solid #2a2a2a; min-width:200px; max-height:260px; overflow-y:auto; padding:.2rem 0; }
+    .open-proj-row { display:flex; align-items:center; justify-content:space-between; padding:.45rem .8rem; font-size:.73rem; font-weight:300; color:#777; cursor:pointer; letter-spacing:.03em; user-select:none; }
+    .open-proj-row:hover { color:var(--text); background:#111; }
+    .open-proj-del { background:none; border:none; color:#2e2e2e; font-size:.9rem; cursor:pointer; padding:0 0 0 .5rem; transition:color .12s; }
+    .open-proj-del:hover { color:#c44; }
+    .open-proj-empty { padding:.5rem .8rem; font-size:.68rem; color:#333; letter-spacing:.06em; }
 
     /* ── Footer ── */
-    footer { flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 2.5rem; height: 34px; border-top: 1px solid var(--border); font-size: 0.56rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
-    .footer-left { display: flex; gap: 2rem; }
+    footer { flex-shrink:0; display:flex; align-items:center; justify-content:space-between; padding:0 2.5rem; height:34px; border-top:1px solid var(--brd); font-size:.56rem; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); }
+    .footer-left { display:flex; gap:2rem; }
+    #dir-label { color:#2a2a2a; }
   </style>
 </head>
 <body>
@@ -192,6 +187,15 @@
   <header>
     <h1>Critical Path</h1>
     <span class="subtitle">Engineering Project Management</span>
+    <div class="header-actions">
+      <input class="proj-name-input" id="proj-name" type="text" value="Untitled" placeholder="Project name" spellcheck="false" />
+      <button class="hdr-btn" id="new-btn">New</button>
+      <button class="hdr-btn" id="save-btn">Save</button>
+      <button class="hdr-btn" id="open-btn">Open</button>
+      <button class="hdr-btn" id="export-btn">Export</button>
+      <button class="hdr-btn" id="import-btn">Import</button>
+      <input type="file" id="import-input" accept=".json" hidden />
+    </div>
   </header>
 
   <nav class="tab-bar">
@@ -206,11 +210,13 @@
       <div class="items-scroll">
         <table class="tbl">
           <colgroup>
-            <col /><col class="col-num" /><col class="col-num" /><col class="col-pred" /><col class="col-icon" /><col class="col-icon" />
+            <col /><col class="col-num"/><col class="col-num"/><col class="col-pred"/>
+            <col class="col-icon"/><col class="col-icon"/><col class="col-icon"/>
           </colgroup>
           <thead>
             <tr>
-              <th>Item Name</th><th>Duration (days)</th><th>Std Dev (days)</th><th>Predecessors</th><th></th><th></th>
+              <th>Item Name</th><th>Duration (days)</th><th>Std Dev (days)</th>
+              <th>Predecessors</th><th></th><th></th><th></th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
@@ -231,6 +237,18 @@
 
     <!-- Calendar -->
     <div id="tab-calendar" class="tab-panel">
+      <div class="cal-legend">
+        <span class="leg"><span class="leg-sw" style="background:rgba(255,255,255,.9)"></span>Critical path</span>
+        <span class="leg"><span class="leg-sw" style="background:rgba(255,255,255,.25)"></span>Non-critical</span>
+        <span class="leg"><span class="leg-sw" style="background:rgba(255,80,55,.8)"></span>Overdue critical</span>
+        <span class="leg"><span class="leg-sw" style="background:rgba(255,80,55,.25)"></span>Overdue</span>
+        <span class="leg"><span class="leg-sw" style="background:rgba(93,200,122,.35);border:1px solid rgba(93,200,122,.5)"></span>Complete</span>
+        <div class="zoom-ctrl">
+          <button class="zoom-btn" id="zoom-out">−</button>
+          <span class="zoom-pct" id="zoom-pct">100%</span>
+          <button class="zoom-btn" id="zoom-in">+</button>
+        </div>
+      </div>
       <div class="cal-viewport">
         <div class="placeholder-msg" id="cal-empty">Add items with durations to see the calendar</div>
         <svg id="cal-svg"></svg>
@@ -239,473 +257,854 @@
   </main>
 
   <footer>
-    <div class="footer-left"><span>CPM v0.1.0</span><span>Mode: Analysis</span></div>
+    <div class="footer-left"><span>CPM v0.1.0</span><span>Mode: Analysis</span><span id="dir-label"></span></div>
     <span id="clock"></span>
   </footer>
 
   <div id="picker-backdrop" hidden></div>
   <div id="picker" hidden></div>
 
+  <div id="open-backdrop" hidden></div>
+  <div id="open-panel" hidden></div>
+
   <script>
     // ── State ──────────────────────────────────────────────────────────────────
-    const items = new Map(); // id → { id, name, duration, stddev, predecessors: Set<id> }
-    let nextId       = 1;
-    let activePicker = null;
-    let objectiveId  = null;   // item id marked as the overall objective
-    let objectiveDate = '';    // ISO string "YYYY-MM-DD"
+    // item: { id, name, duration, stddev, predecessors: Set<id>, complete: bool }
+    const items = new Map();
+    let nextId = 1, activePicker = null, objectiveId = null, objectiveDate = '';
 
     // ── Utilities ──────────────────────────────────────────────────────────────
-    const esc  = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    const trunc = (s,n) => s.length > n ? s.slice(0,n-1)+'…' : s;
-    const label  = id => { const it = items.get(id); return it?.name.trim() || `#${id}`; };
+    const esc    = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    const trunc  = (s,n) => s.length>n ? s.slice(0,n-1)+'…' : s;
+    const label  = id => { const it=items.get(id); return it?.name.trim()||`#${id}`; };
     const durOf  = id => Math.max(parseFloat(items.get(id)?.duration)||0, 0);
+    const effDur = id => items.get(id)?.complete ? 0 : durOf(id);  // 0 for complete items
 
-    // Days from today to the objective target date (can be negative)
     function targetDaysFromToday() {
       if (!objectiveId || !objectiveDate || !items.has(objectiveId)) return null;
-      const today = new Date(); today.setHours(0,0,0,0);
-      const td    = new Date(objectiveDate); td.setHours(0,0,0,0);
-      return (td - today) / 86400000;
+      const t = new Date(); t.setHours(0,0,0,0);
+      const d = new Date(objectiveDate); d.setHours(0,0,0,0);
+      return (d-t)/86400000;
     }
 
-    // ── CPM ───────────────────────────────────────────────────────────────────
-    function computeSchedule() {
-      const es = new Map(), ef = new Map(), ls = new Map(), lf = new Map();
+    // ── CPM core ──────────────────────────────────────────────────────────────
+    // Runs a full CPM pass with the given duration function. Returns {es,ef,ls,lf}.
+    function runCPM(durFn) {
+      const es=new Map(), ef=new Map(), ls=new Map(), lf=new Map();
       for (const [id] of items) { es.set(id,0); ef.set(id,0); }
 
-      // Forward pass
-      for (let i = 0; i < items.size; i++)
-        for (const [id, item] of items) {
-          let maxPredEF = 0;
-          for (const pid of item.predecessors)
-            if (items.has(pid)) maxPredEF = Math.max(maxPredEF, ef.get(pid)||0);
-          es.set(id, maxPredEF);
-          ef.set(id, maxPredEF + durOf(id));
+      // Forward
+      for (let i=0; i<items.size; i++)
+        for (const [id,item] of items) {
+          let mx=0;
+          for (const pid of item.predecessors) if (items.has(pid)) mx=Math.max(mx,ef.get(pid)||0);
+          es.set(id,mx); ef.set(id,mx+durFn(id));
         }
 
-      // Project finish: use objective target date if set, else max EF
       const td = targetDaysFromToday();
-      const projectFinish = (td !== null) ? td : Math.max(...ef.values(), 0);
+      const pf = td!==null ? td : Math.max(...ef.values(),0);
 
-      // Build successor map
-      const succ = new Map([...items.keys()].map(id => [id, new Set()]));
-      for (const [id, item] of items)
-        for (const pid of item.predecessors) succ.get(pid)?.add(id);
+      // Successor map
+      const succ=new Map([...items.keys()].map(id=>[id,new Set()]));
+      for (const [id,item] of items) for (const pid of item.predecessors) succ.get(pid)?.add(id);
 
-      // Backward pass
-      for (const [id] of items) { lf.set(id, projectFinish); ls.set(id, projectFinish - durOf(id)); }
-      for (let i = 0; i < items.size; i++)
+      // Backward
+      for (const [id] of items) { lf.set(id,pf); ls.set(id,pf-durFn(id)); }
+      for (let i=0; i<items.size; i++)
         for (const [id] of items) {
-          const succs = succ.get(id);
-          let minSuccLS = projectFinish;
-          for (const sid of succs) minSuccLS = Math.min(minSuccLS, ls.get(sid)??projectFinish);
-          lf.set(id, minSuccLS);
-          ls.set(id, minSuccLS - durOf(id));
+          let mn=pf;
+          for (const sid of succ.get(id)) mn=Math.min(mn,ls.get(sid)??pf);
+          lf.set(id,mn); ls.set(id,mn-durFn(id));
         }
 
-      // Force objective item's LF to target date
-      if (td !== null && items.has(objectiveId)) {
-        lf.set(objectiveId, td);
-        ls.set(objectiveId, td - durOf(objectiveId));
+      // Force objective LF to target date
+      if (td!==null && items.has(objectiveId)) {
+        lf.set(objectiveId,td); ls.set(objectiveId,td-durFn(objectiveId));
       }
 
-      // Critical path: float ≈ 0
-      const critical = new Set();
-      for (const [id] of items)
-        if (Math.abs((ls.get(id)??0) - (es.get(id)??0)) < 0.001) critical.add(id);
+      return {es,ef,ls,lf};
+    }
 
-      return { es, ef, ls, lf, critical, projectFinish, targetDays: td };
+    // Find the critical path.
+    //
+    // "Critical" = every incomplete item that lies on ANY root→sink path
+    // whose minimum scheduled end date (LF / EF) equals the global minimum
+    // across all such paths. This means multiple parallel chains that share
+    // the same soonest-due date are ALL highlighted simultaneously.
+    //
+    // Algorithm: two-pass DP.
+    //   fwdMin[id] = min bEnd of incomplete items on any root→id path
+    //   bwdMin[id] = min bEnd of incomplete items on any id→sink path
+    //
+    // An item is critical iff min(fwdMin, bwdMin) == globalMinEnd.
+    function findCriticalPath(sched) {
+      if (!items.size) return new Set();
+
+      const hasObj = targetDaysFromToday() !== null;
+      const bEnd   = id => hasObj ? (sched.lf.get(id)??0) : (sched.ef.get(id)??0);
+      const ownEnd = id => {
+        const it=items.get(id);
+        return (!it?.complete && durOf(id)>0) ? bEnd(id) : Infinity;
+      };
+
+      // Build successor map + in-degree for topological sort
+      const succ  = new Map([...items.keys()].map(id=>[id,new Set()]));
+      const inDeg = new Map([...items.keys()].map(id=>[id,0]));
+      for (const [id,item] of items)
+        for (const pid of item.predecessors)
+          if (items.has(pid)) { succ.get(pid).add(id); inDeg.set(id,(inDeg.get(id)||0)+1); }
+
+      // Kahn's topological sort
+      const q=[...items.keys()].filter(id=>inDeg.get(id)===0), topo=[];
+      while (q.length) {
+        const id=q.shift(); topo.push(id);
+        for (const sid of succ.get(id)) { inDeg.set(sid,inDeg.get(sid)-1); if(inDeg.get(sid)===0) q.push(sid); }
+      }
+
+      // Forward pass: fwdMin[id] = min bEnd of incomplete items on any root→id path
+      const fwdMin=new Map();
+      for (const id of topo) {
+        let best=Infinity;
+        for (const pid of (items.get(id)?.predecessors||[]))
+          if (items.has(pid)) best=Math.min(best, fwdMin.get(pid)??Infinity);
+        fwdMin.set(id, Math.min(best, ownEnd(id)));
+      }
+
+      // Global minimum: smallest fwdMin across all sinks
+      const sinks=[...items.keys()].filter(id=>succ.get(id).size===0);
+      const pool = sinks.length ? sinks : [...items.keys()];
+      let globalMin=Infinity;
+      for (const id of pool) globalMin=Math.min(globalMin, fwdMin.get(id)??Infinity);
+      if (globalMin===Infinity) return new Set();
+
+      // Backward pass: bwdMin[id] = min bEnd of incomplete items on any id→sink path
+      const bwdMin=new Map();
+      for (const id of [...topo].reverse()) {
+        let best=Infinity;
+        for (const sid of succ.get(id)) best=Math.min(best, bwdMin.get(sid)??Infinity);
+        bwdMin.set(id, Math.min(best, ownEnd(id)));
+      }
+
+      // An item is critical iff it is incomplete, has duration, and lies on
+      // a path achieving globalMin — i.e. min(fwdMin, bwdMin) == globalMin.
+      const critical=new Set();
+      for (const [id,item] of items) {
+        if (item.complete || durOf(id)===0) continue;
+        const combined=Math.min(fwdMin.get(id)??Infinity, bwdMin.get(id)??Infinity);
+        if (Math.abs(combined-globalMin)<0.001) critical.add(id);
+      }
+
+      return critical;
+    }
+
+    // Full schedule: positions from real durations, critical path from DP on effective durations.
+    function computeSchedule() {
+      const sched = runCPM(durOf);
+      return { ...sched, critical: findCriticalPath(sched), targetDays: targetDaysFromToday() };
     }
 
     // ── Cycle detection ────────────────────────────────────────────────────────
     function wouldCycle(itemId, predId) {
-      const visited = new Set();
+      const visited=new Set();
       function dfs(id) {
-        if (id === predId) return true;
+        if (id===predId) return true;
         if (visited.has(id)) return false;
         visited.add(id);
-        for (const [oid, o] of items) if (o.predecessors.has(id) && dfs(oid)) return true;
+        for (const [oid,o] of items) if (o.predecessors.has(id) && dfs(oid)) return true;
         return false;
       }
       return dfs(itemId);
     }
 
-    // ── Item CRUD ─────────────────────────────────────────────────────────────
+    // ── CRUD ──────────────────────────────────────────────────────────────────
     function addItem() {
-      const id = nextId++;
-      items.set(id, { id, name:'', duration:'', stddev:'', predecessors: new Set() });
+      const id=nextId++;
+      items.set(id,{id,name:'',duration:'',stddev:'',predecessors:new Set(),complete:false});
       renderTable(); refresh();
       document.querySelector(`[data-id="${id}"][data-field="name"]`)?.focus();
     }
 
     function removeItem(id) {
-      if (objectiveId === id) { objectiveId = null; objectiveDate = ''; }
+      if (objectiveId===id) { objectiveId=null; objectiveDate=''; }
       items.delete(id);
-      for (const item of items.values()) item.predecessors.delete(id);
+      for (const it of items.values()) it.predecessors.delete(id);
       closePicker(); renderTable(); refresh();
     }
 
-    function updateField(id, field, value) {
-      const item = items.get(id); if (!item) return;
-      item[field] = value;
-      if (field === 'name')
-        for (const [oid,o] of items) if (o.predecessors.has(id)) refreshChips(oid);
+    function updateField(id,field,value) {
+      const it=items.get(id); if (!it) return;
+      it[field]=value;
+      if (field==='name') for (const [oid,o] of items) if (o.predecessors.has(id)) refreshChips(oid);
       refresh();
     }
 
-    function togglePred(itemId, predId) {
-      const item = items.get(itemId); if (!item) return;
-      if (item.predecessors.has(predId)) item.predecessors.delete(predId);
-      else { if (wouldCycle(itemId, predId)) return; item.predecessors.add(predId); }
+    function togglePred(itemId,predId) {
+      const it=items.get(itemId); if (!it) return;
+      if (it.predecessors.has(predId)) it.predecessors.delete(predId);
+      else { if (wouldCycle(itemId,predId)) return; it.predecessors.add(predId); }
       refreshChips(itemId); refresh();
     }
 
     function toggleObjective(id) {
-      if (objectiveId === id) { objectiveId = null; objectiveDate = ''; }
-      else { objectiveId = id; /* keep any previously set date */ }
+      objectiveId = (objectiveId===id) ? null : id;
+      if (!objectiveId) objectiveDate='';
       renderTable(); refresh();
+    }
+
+    function toggleComplete(id) {
+      const it=items.get(id); if (!it) return;
+      it.complete=!it.complete;
+      // Partial DOM update — no full re-render so focused inputs keep focus
+      const tr=document.querySelector(`tr[data-row-id="${id}"]`);
+      if (tr) tr.classList.toggle('is-complete',it.complete);
+      const btn=document.querySelector(`[data-complete="${id}"]`);
+      if (btn) btn.classList.toggle('active',it.complete);
+      refresh();
     }
 
     // ── Table rendering ────────────────────────────────────────────────────────
     function renderTable() {
-      const tbody = document.getElementById('tbody');
-      tbody.innerHTML = '';
-      for (const [id, item] of items) {
-        const isObj = objectiveId === id;
+      const tbody=document.getElementById('tbody');
+      tbody.innerHTML='';
+      for (const [id,item] of items) {
+        const isObj=objectiveId===id, isDone=item.complete;
 
-        // Main row
-        const tr = document.createElement('tr');
-        if (isObj) tr.classList.add('is-objective');
-        tr.innerHTML = `
+        const tr=document.createElement('tr');
+        tr.dataset.rowId=id;
+        if (isObj)  tr.classList.add('is-objective');
+        if (isDone) tr.classList.add('is-complete');
+
+        tr.innerHTML=`
           <td><input class="cell-input" type="text"   value="${esc(item.name)}"     placeholder="Item name" data-field="name"     data-id="${id}"/></td>
           <td><input class="cell-input" type="number" value="${esc(item.duration)}" placeholder="0" min="0" step="0.5" data-field="duration" data-id="${id}"/></td>
           <td><input class="cell-input" type="number" value="${esc(item.stddev)}"   placeholder="0" min="0" step="0.1" data-field="stddev"   data-id="${id}"/></td>
           <td><div class="pred-cell" data-pred-for="${id}">${chips(id)}</div></td>
-          <td><button class="obj-btn${isObj?' active':''}" data-obj="${id}" title="${isObj?'Remove objective':'Set as objective'}">◎</button></td>
-          <td><button class="del-btn" data-del="${id}">&#xD7;</button></td>`;
+          <td><button class="chk-btn${isDone?' active':''}" data-complete="${id}" title="${isDone?'Mark incomplete':'Mark complete'}">✓</button></td>
+          <td><button class="obj-btn${isObj?' active':''}" data-obj="${id}"      title="${isObj?'Remove objective':'Set as objective'}">◎</button></td>
+          <td><button class="del-btn"                       data-del="${id}"      title="Remove">&#xD7;</button></td>`;
         tbody.appendChild(tr);
 
         // Objective date sub-row
-        const dateRow = document.createElement('tr');
-        dateRow.className = 'obj-date-row';
-        dateRow.dataset.objDateFor = id;
-        dateRow.hidden = !isObj;
-        dateRow.innerHTML = `
-          <td colspan="6">
-            <div class="obj-date-cell">
-              <span class="obj-date-label">Target Date</span>
-              <input type="date" class="date-input" data-obj-date="${id}" value="${isObj ? objectiveDate : ''}" />
-            </div>
-          </td>`;
-        tbody.appendChild(dateRow);
+        const dr=document.createElement('tr');
+        dr.className='obj-date-row'; dr.hidden=!isObj;
+        dr.innerHTML=`<td colspan="7"><div class="obj-date-cell">
+          <span class="obj-date-label">Target Date</span>
+          <input type="date" class="date-input" data-obj-date="${id}" value="${isObj?objectiveDate:''}"/>
+        </div></td>`;
+        tbody.appendChild(dr);
       }
     }
 
     function chips(id) {
-      const item = items.get(id); if (!item) return '';
-      let h = '';
-      for (const pid of item.predecessors)
+      const it=items.get(id); if (!it) return '';
+      let h='';
+      for (const pid of it.predecessors)
         if (items.has(pid))
-          h += `<span class="pred-chip">${esc(trunc(label(pid),14))}<button class="chip-remove" data-remove-pred="${id}" data-pred-id="${pid}">&#xD7;</button></span>`;
-      return h + `<button class="add-pred-btn" data-add-pred="${id}">+</button>`;
+          h+=`<span class="pred-chip">${esc(trunc(label(pid),14))}<button class="chip-remove" data-remove-pred="${id}" data-pred-id="${pid}">&#xD7;</button></span>`;
+      return h+`<button class="add-pred-btn" data-add-pred="${id}">+</button>`;
     }
 
     function refreshChips(id) {
-      const el = document.querySelector(`[data-pred-for="${id}"]`);
-      if (el) el.innerHTML = chips(id);
+      const el=document.querySelector(`[data-pred-for="${id}"]`);
+      if (el) el.innerHTML=chips(id);
     }
 
-    // ── Event delegation ───────────────────────────────────────────────────────
+    // ── Events ────────────────────────────────────────────────────────────────
     document.getElementById('tbody').addEventListener('input', e => {
-      if (e.target.dataset.field) updateField(+e.target.dataset.id, e.target.dataset.field, e.target.value);
-      if (e.target.dataset.objDate !== undefined) {
-        objectiveDate = e.target.value;
-        refresh();
-      }
+      if (e.target.dataset.field)    updateField(+e.target.dataset.id, e.target.dataset.field, e.target.value);
+      if (e.target.dataset.objDate!==undefined) { objectiveDate=e.target.value; refresh(); }
     });
 
     document.getElementById('tbody').addEventListener('click', e => {
-      const del     = e.target.closest('[data-del]');
-      const addPred = e.target.closest('[data-add-pred]');
-      const rmPred  = e.target.closest('[data-remove-pred]');
-      const obj     = e.target.closest('[data-obj]');
-      if (del)     { removeItem(+del.dataset.del); return; }
-      if (obj)     { toggleObjective(+obj.dataset.obj); return; }
-      if (addPred) { showPicker(+addPred.dataset.addPred, addPred); return; }
-      if (rmPred)  { togglePred(+rmPred.dataset.removePred, +rmPred.dataset.predId); return; }
+      const del=e.target.closest('[data-del]'), addP=e.target.closest('[data-add-pred]'),
+            rmP=e.target.closest('[data-remove-pred]'), obj=e.target.closest('[data-obj]'),
+            chk=e.target.closest('[data-complete]');
+      if (del)  { removeItem(+del.dataset.del);                                    return; }
+      if (chk)  { toggleComplete(+chk.dataset.complete);                           return; }
+      if (obj)  { toggleObjective(+obj.dataset.obj);                               return; }
+      if (addP) { showPicker(+addP.dataset.addPred, addP);                         return; }
+      if (rmP)  { togglePred(+rmP.dataset.removePred, +rmP.dataset.predId);        return; }
     });
 
     document.getElementById('add-btn').addEventListener('click', addItem);
 
     // ── Picker ────────────────────────────────────────────────────────────────
-    const picker         = document.getElementById('picker');
-    const pickerBackdrop = document.getElementById('picker-backdrop');
+    const picker=document.getElementById('picker'), backdrop=document.getElementById('picker-backdrop');
 
     function showPicker(itemId, anchor) {
-      activePicker = itemId;
-      const item = items.get(itemId);
-      picker.innerHTML = '';
-      const others = [...items.entries()].filter(([id]) => id !== itemId);
-      if (!others.length) {
-        picker.innerHTML = '<div class="picker-empty">No other items yet</div>';
-      } else {
+      activePicker=itemId;
+      const it=items.get(itemId);
+      picker.innerHTML='';
+      const others=[...items.entries()].filter(([id])=>id!==itemId);
+      if (!others.length) { picker.innerHTML='<div class="picker-empty">No other items yet</div>'; }
+      else {
         for (const [id] of others) {
-          const sel    = item.predecessors.has(id);
-          const cyclic = !sel && wouldCycle(itemId, id);
-          const row    = document.createElement('div');
-          row.className = `picker-row${sel?' selected':''}${cyclic?' cyclic':''}`;
-          row.dataset.pickId = id;
-          row.innerHTML = `<span class="picker-check">${sel?'✓':''}</span>${esc(trunc(label(id),24))}${cyclic?` <span style="color:#2a2a2a;font-size:.6rem">⊗</span>`:''}`;
+          const sel=it.predecessors.has(id), cyc=!sel&&wouldCycle(itemId,id);
+          const row=document.createElement('div');
+          row.className=`picker-row${sel?' selected':''}${cyc?' cyclic':''}`;
+          row.dataset.pickId=id;
+          row.innerHTML=`<span class="picker-check">${sel?'✓':''}</span>${esc(trunc(label(id),24))}${cyc?` <span style="color:#2a2a2a;font-size:.6rem">⊗</span>`:''}`;
           picker.appendChild(row);
         }
       }
-      const r = anchor.getBoundingClientRect();
-      picker.style.left = `${Math.min(r.left, window.innerWidth-210)}px`;
-      picker.style.top  = `${r.bottom+4}px`;
-      picker.hidden = pickerBackdrop.hidden = false;
+      const r=anchor.getBoundingClientRect();
+      picker.style.left=`${Math.min(r.left,window.innerWidth-210)}px`;
+      picker.style.top=`${r.bottom+4}px`;
+      picker.hidden=backdrop.hidden=false;
     }
 
-    function closePicker() { picker.hidden = pickerBackdrop.hidden = true; activePicker = null; }
-
-    pickerBackdrop.addEventListener('click', closePicker);
+    function closePicker() { picker.hidden=backdrop.hidden=true; activePicker=null; }
+    backdrop.addEventListener('click', closePicker);
     picker.addEventListener('click', e => {
-      const row = e.target.closest('[data-pick-id]');
-      if (!row || activePicker === null || row.classList.contains('cyclic')) return;
-      togglePred(activePicker, +row.dataset.pickId);
-      const item = items.get(activePicker);
-      picker.querySelectorAll('.picker-row[data-pick-id]').forEach(r => {
-        const id = +r.dataset.pickId, sel = item?.predecessors.has(id);
-        r.classList.toggle('selected', !!sel);
-        r.querySelector('.picker-check').textContent = sel ? '✓' : '';
+      const row=e.target.closest('[data-pick-id]');
+      if (!row||activePicker===null||row.classList.contains('cyclic')) return;
+      togglePred(activePicker,+row.dataset.pickId);
+      const it=items.get(activePicker);
+      picker.querySelectorAll('.picker-row[data-pick-id]').forEach(r=>{
+        const id=+r.dataset.pickId, sel=it?.predecessors.has(id);
+        r.classList.toggle('selected',!!sel);
+        r.querySelector('.picker-check').textContent=sel?'✓':'';
       });
     });
 
-    // ── Graph rendering ────────────────────────────────────────────────────────
-    const NW=148, NH=50, CG=96, RG=22, GPAD=36;
+    // ── Graph ─────────────────────────────────────────────────────────────────
+    const NW=148,NH=50,CG=96,RG=22,GPAD=36;
 
     function renderGraph() {
-      const svg = document.getElementById('graph-svg');
-      const empty = document.getElementById('graph-empty');
-      if (items.size === 0) {
-        svg.innerHTML=''; svg.removeAttribute('width'); svg.removeAttribute('height');
-        empty.style.display=''; return;
-      }
+      const svg=document.getElementById('graph-svg');
+      const empty=document.getElementById('graph-empty');
+      if (!items.size) { svg.innerHTML=''; svg.removeAttribute('width'); svg.removeAttribute('height'); empty.style.display=''; return; }
       empty.style.display='none';
 
-      const col = new Map();
+      const { critical } = computeSchedule();
+
+      // Layout
+      const col=new Map();
       for (const [id] of items) col.set(id,0);
       for (let i=0; i<items.size; i++)
         for (const [id,item] of items)
           for (const pid of item.predecessors)
             if (items.has(pid)) { const d=(col.get(pid)??0)+1; if(d>(col.get(id)??0)) col.set(id,d); }
 
-      const groups = new Map();
-      for (const [id,c] of col) { if (!groups.has(c)) groups.set(c,[]); groups.get(c).push(id); }
-      const layout = new Map();
-      for (const [c,ids] of groups) ids.forEach((id,r) => layout.set(id,{c,r}));
+      const grp=new Map();
+      for (const [id,c] of col) { if (!grp.has(c)) grp.set(c,[]); grp.get(c).push(id); }
+      const lay=new Map();
+      for (const [c,ids] of grp) ids.forEach((id,r)=>lay.set(id,{c,r}));
 
-      const numCols  = Math.max(...groups.keys())+1;
-      const colSizes = new Map([...groups.entries()].map(([c,ids])=>[c,ids.length]));
-      const maxRows  = Math.max(...colSizes.values());
-      const contentH = maxRows*NH + Math.max(0,maxRows-1)*RG;
-      const totalW   = GPAD + numCols*NW + Math.max(0,numCols-1)*CG + GPAD;
-      const totalH   = GPAD + contentH + GPAD;
+      const nc=Math.max(...grp.keys())+1, cs=new Map([...grp.entries()].map(([c,ids])=>[c,ids.length]));
+      const mr=Math.max(...cs.values()), ch=mr*NH+Math.max(0,mr-1)*RG;
+      const TW=GPAD+nc*NW+Math.max(0,nc-1)*CG+GPAD, TH=GPAD+ch+GPAD;
 
-      const pos = new Map();
-      for (const [id,{c,r}] of layout) {
-        const cnt=colSizes.get(c), colH=cnt*NH+Math.max(0,cnt-1)*RG;
-        pos.set(id,{ x: GPAD+c*(NW+CG), y: GPAD+(contentH-colH)/2+r*(NH+RG) });
+      const pos=new Map();
+      for (const [id,{c,r}] of lay) {
+        const cnt=cs.get(c),clh=cnt*NH+Math.max(0,cnt-1)*RG;
+        pos.set(id,{x:GPAD+c*(NW+CG),y:GPAD+(ch-clh)/2+r*(NH+RG)});
       }
 
-      let s = `<defs><marker id="arr" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M 0 1.2 L 6 3.5 L 0 5.8 z" fill="#303030"/></marker></defs>`;
+      // Build successor map for edge colouring
+      const succ=new Map([...items.keys()].map(id=>[id,new Set()]));
+      for (const [id,item] of items) for (const pid of item.predecessors) succ.get(pid)?.add(id);
+      // A critical edge connects two critical nodes
+      const critEdge=(a,b)=>critical.has(a)&&critical.has(b);
 
+      let s=`<defs><marker id="arr" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M 0 1.2 L 6 3.5 L 0 5.8 z" fill="#303030"/></marker>
+        <marker id="arrC" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M 0 1.2 L 6 3.5 L 0 5.8 z" fill="rgba(255,255,255,.3)"/></marker></defs>`;
+
+      // Edges
       for (const [id,item] of items) {
         const to=pos.get(id);
         for (const pid of item.predecessors) {
           const fr=pos.get(pid); if (!fr||!to) continue;
           const x1=fr.x+NW,y1=fr.y+NH/2,x2=to.x,y2=to.y+NH/2,mx=(x1+x2)/2;
-          s+=`<path class="g-edge" d="M${x1} ${y1} C${mx} ${y1},${mx} ${y2},${x2} ${y2}" marker-end="url(#arr)"/>`;
+          const isCrit=critEdge(pid,id);
+          s+=`<path class="${isCrit?'g-edge-crit':'g-edge'}" d="M${x1} ${y1} C${mx} ${y1},${mx} ${y2},${x2} ${y2}" marker-end="url(#${isCrit?'arrC':'arr'})"/>`;
         }
       }
+
+      // Nodes
       for (const [id,item] of items) {
         const {x,y}=pos.get(id);
-        const isObj = objectiveId === id;
-        const name  = esc(trunc(item.name.trim()||`#${id}`,20));
-        const meta  = item.duration ? esc(`${item.duration} days`) : '';
-        const extra = isObj && objectiveDate ? ` ◎ ${esc(new Date(objectiveDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}))}` : '';
-        s+=`<g><rect class="g-node-rect" x="${x}" y="${y}" width="${NW}" height="${NH}" rx="1" ${isObj?'stroke="rgba(255,255,255,0.3)"':''}/>
-          <text class="g-node-name" x="${x+NW/2}" y="${y+(meta?20:27)}" text-anchor="middle">${name}</text>
-          ${meta?`<text class="g-node-meta" x="${x+NW/2}" y="${y+36}" text-anchor="middle">${meta}${extra}</text>`:''}
+        const isCrit=critical.has(id), isDone=item.complete, isObj=objectiveId===id;
+        const rectClass=isDone?'g-node-rect-done':isCrit?'g-node-rect-crit':'g-node-rect';
+        const nameClass=isDone?'g-node-name-done':'g-node-name';
+        const name=esc(trunc(item.name.trim()||`#${id}`,20));
+        const meta=item.duration?esc(`${item.duration} days`):'';
+        const objTag=isObj&&objectiveDate?` ◎ ${esc(new Date(objectiveDate).toLocaleDateString('en-US',{month:'short',day:'numeric'}))}` : '';
+        s+=`<g><rect class="${rectClass}" x="${x}" y="${y}" width="${NW}" height="${NH}" rx="1"/>
+          <text class="${nameClass}" x="${x+NW/2}" y="${y+(meta?20:27)}" text-anchor="middle">${name}${isDone?' ✓':''}</text>
+          ${meta?`<text class="g-node-meta" x="${x+NW/2}" y="${y+36}" text-anchor="middle">${meta}${objTag}</text>`:''}
         </g>`;
       }
 
-      svg.setAttribute('width',totalW); svg.setAttribute('height',totalH);
-      svg.setAttribute('viewBox',`0 0 ${totalW} ${totalH}`);
-      svg.innerHTML = s;
+      svg.setAttribute('width',TW); svg.setAttribute('height',TH);
+      svg.setAttribute('viewBox',`0 0 ${TW} ${TH}`);
+      svg.innerHTML=s;
     }
 
-    // ── Calendar rendering ─────────────────────────────────────────────────────
-    const NAME_W=170, DAY_W=38, ROW_H=40, HDR_H=52, CAL_PAD=24;
+    // ── Calendar ──────────────────────────────────────────────────────────────
+    const NAME_W=170,ROW_H=40,HDR_H=52,CAL_PAD=24;
+    let calZoom=1;
+    const ZOOM_MIN=0.12, ZOOM_MAX=6, ZOOM_BASE=38;
 
     function renderCalendar() {
-      const svg   = document.getElementById('cal-svg');
-      const empty = document.getElementById('cal-empty');
-
-      const hasDur = [...items.values()].some(it => parseFloat(it.duration) > 0);
-      if (items.size === 0 || !hasDur) {
-        svg.innerHTML=''; svg.removeAttribute('width'); svg.removeAttribute('height');
-        empty.style.display=''; return;
-      }
+      const svg=document.getElementById('cal-svg'), empty=document.getElementById('cal-empty');
+      const hasDur=[...items.values()].some(it=>parseFloat(it.duration)>0);
+      if (!items.size||!hasDur) { svg.innerHTML=''; svg.removeAttribute('width'); svg.removeAttribute('height'); empty.style.display=''; return; }
       empty.style.display='none';
 
-      const sched = computeSchedule();
-      const { es, ef, ls, lf, critical, targetDays } = sched;
-      const hasObjective = targetDays !== null;
+      const { es, ef, ls, lf, critical, targetDays } = computeSchedule();
+      const hasObj = targetDays!==null;
 
-      // Choose bar positions: late-start if objective, else early-start
-      const barStart = id => hasObjective ? (ls.get(id)??0) : (es.get(id)??0);
-      const barEnd   = id => hasObjective ? (lf.get(id)??0) : (ef.get(id)??0);
+      // Bar position: LS in objective mode, ES in forward mode
+      const bStart = id => hasObj ? (ls.get(id)??0) : (es.get(id)??0);
 
-      // Calendar range
-      const today = new Date(); today.setHours(0,0,0,0);
+      const today=new Date(); today.setHours(0,0,0,0);
+
       let dayStart, dayEnd;
-      if (hasObjective) {
-        const allStarts = [...items.keys()].map(barStart);
-        dayStart = Math.floor(Math.min(0, ...allStarts)) - 1;
-        dayEnd   = Math.ceil(targetDays) + 4;
+      if (hasObj) {
+        const allS=[...items.keys()].map(bStart);
+        dayStart=Math.floor(Math.min(0,...allS))-1;
+        dayEnd=Math.ceil(targetDays)+4;
       } else {
-        const maxEF = Math.max(...[...ef.values()], 14);
-        dayStart = 0;
-        dayEnd   = Math.ceil(maxEF) + 7;
+        dayStart=0;
+        dayEnd=Math.ceil(Math.max(...ef.values(),14))+7;
       }
-      const totalDays = dayEnd - dayStart;
+      const totalDays=dayEnd-dayStart;
 
-      // Helper: calendar date for column index (0 = first column = dayStart relative to today)
-      function colDate(colIdx) {
-        const dt = new Date(today);
-        dt.setDate(today.getDate() + dayStart + colIdx);
-        return dt;
-      }
+      const DAY_W = Math.max(2, ZOOM_BASE * calZoom);
 
-      // Helper: x position for a day number (relative to today)
-      function dayX(day) { return NAME_W + (day - dayStart) * DAY_W; }
+      function colDate(c) { const d=new Date(today); d.setDate(today.getDate()+dayStart+c); return d; }
+      function dayX(day)  { return NAME_W+(day-dayStart)*DAY_W; }
 
-      const svgW = NAME_W + totalDays * DAY_W + CAL_PAD;
-      const svgH = HDR_H + items.size * ROW_H + CAL_PAD;
+      const svgW=NAME_W+totalDays*DAY_W+CAL_PAD;
+      const svgH=HDR_H+items.size*ROW_H+CAL_PAD;
+      let s='';
 
-      let s = '';
+      // Past-date shading (single rect, not per-day)
+      if (dayStart<0) s+=`<rect class="c-past-col" x="${NAME_W}" y="${HDR_H}" width="${-dayStart*DAY_W}" height="${items.size*ROW_H}"/>`;
 
-      // Past column shading (before today, when objective mode shifts timeline)
-      if (dayStart < 0) {
-        const pastCols = Math.min(-dayStart, totalDays);
-        s += `<rect class="c-past-col" x="${NAME_W}" y="${HDR_H}" width="${pastCols * DAY_W}" height="${items.size * ROW_H}"/>`;
-      }
-
-      // Weekend shading
-      for (let d = 0; d < totalDays; d++) {
-        const dt = colDate(d);
-        if (dt.getDay() === 0 || dt.getDay() === 6)
-          s += `<rect class="c-weekend" x="${NAME_W + d*DAY_W}" y="${HDR_H}" width="${DAY_W}" height="${items.size*ROW_H}"/>`;
-      }
-
-      // Grid lines horizontal
-      for (let r = 0; r <= items.size; r++)
-        s += `<line class="c-grid-h" x1="${NAME_W}" y1="${HDR_H+r*ROW_H}" x2="${svgW-CAL_PAD}" y2="${HDR_H+r*ROW_H}"/>`;
-
-      // Grid lines vertical + date header
-      let lastMonth = -1;
-      for (let d = 0; d <= totalDays; d++) {
-        const x  = NAME_W + d*DAY_W;
-        const dt = colDate(d);
-        const isWeekStart = dt.getDay() === 1;
-        const isPast = d < -dayStart;
-        if (d < totalDays) {
-          s += `<line class="${isWeekStart?'c-grid-vwk':'c-grid-v'}" x1="${x}" y1="${HDR_H}" x2="${x}" y2="${svgH-CAL_PAD}"/>`;
-          const cx = x + DAY_W/2;
-          const mon = dt.getMonth();
-          if (mon !== lastMonth) {
-            s += `<text class="c-month" x="${x+3}" y="13">${dt.toLocaleDateString('en-US',{month:'short',year:'numeric'}).toUpperCase()}</text>`;
-            lastMonth = mon;
-          }
-          s += `<text class="${isPast?'c-day-past':'c-day'}" x="${cx}" y="31" text-anchor="middle">${dt.getDate()}</text>`;
-          s += `<text class="c-dow" x="${cx}" y="43" text-anchor="middle">${['S','M','T','W','T','F','S'][dt.getDay()]}</text>`;
+      // Weekend shading — skip when very zoomed out (invisible anyway)
+      if (DAY_W>=5) {
+        for (let d=0; d<totalDays; d++) {
+          const dt=colDate(d);
+          if (dt.getDay()===0||dt.getDay()===6)
+            s+=`<rect class="c-weekend" x="${NAME_W+d*DAY_W}" y="${HDR_H}" width="${DAY_W}" height="${items.size*ROW_H}"/>`;
         }
       }
 
-      // Today marker
-      const todayX = dayX(0);
-      if (todayX >= NAME_W && todayX <= svgW - CAL_PAD) {
-        s += `<line class="c-today" x1="${todayX}" y1="8" x2="${todayX}" y2="${svgH-CAL_PAD}"/>`;
-        s += `<text class="c-marker" x="${todayX+3}" y="11" fill="#3a3a3a">TODAY</text>`;
-      }
+      // Horizontal row lines
+      for (let r=0; r<=items.size; r++)
+        s+=`<line class="c-grid-h" x1="${NAME_W}" y1="${HDR_H+r*ROW_H}" x2="${svgW-CAL_PAD}" y2="${HDR_H+r*ROW_H}"/>`;
 
-      // Target date marker
-      if (hasObjective) {
-        const tx = dayX(targetDays);
-        s += `<line class="c-target" x1="${tx}" y1="8" x2="${tx}" y2="${svgH-CAL_PAD}"/>`;
-        s += `<text class="c-marker" x="${tx+3}" y="11" fill="rgba(255,255,255,0.25)">TARGET</text>`;
-      }
+      // Vertical grid lines + header labels
+      // Grid density and label visibility scale with DAY_W:
+      //   DAY_W >= 14 : daily lines + all day numbers + DOW
+      //   DAY_W >= 7  : weekly lines + Monday numbers only
+      //   DAY_W < 7   : monthly lines only, no day numbers
+      let lastMon=-1;
+      for (let d=0; d<=totalDays; d++) {
+        const x=NAME_W+d*DAY_W, dt=colDate(d), isPast=d<-dayStart;
+        const isMonday=dt.getDay()===1, isFirstOfMonth=dt.getDate()===1;
+        const mon=dt.getMonth();
 
-      // Item rows
-      let row = 0;
-      for (const [id, item] of items) {
-        const d = durOf(id);
-        const y = HDR_H + row * ROW_H;
+        if (d<totalDays) {
+          // Vertical grid line
+          if (isFirstOfMonth)
+            s+=`<line class="c-grid-vmo" x1="${x}" y1="0" x2="${x}" y2="${svgH-CAL_PAD}"/>`;
+          else if (DAY_W>=7 && isMonday)
+            s+=`<line class="c-grid-vwk" x1="${x}" y1="${HDR_H}" x2="${x}" y2="${svgH-CAL_PAD}"/>`;
+          else if (DAY_W>=14)
+            s+=`<line class="c-grid-v" x1="${x}" y1="${HDR_H}" x2="${x}" y2="${svgH-CAL_PAD}"/>`;
 
-        // Name label
-        const hasBar = d > 0;
-        s += `<text class="${hasBar?'c-name':'c-name-dim'}" x="${NAME_W-10}" y="${y+ROW_H/2+4}" text-anchor="end">${esc(trunc(label(id),20))}</text>`;
-
-        if (hasBar) {
-          const bStart = barStart(id);
-          const bEnd   = barEnd(id);
-          const isCrit = critical.has(id);
-          const isPast = bStart < 0; // bar starts before today
-
-          // Float bar (only for non-objective mode or non-critical)
-          const floatDays = (lf.get(id)??0) - (ef.get(id)??0);
-          if (!hasObjective && floatDays > 0.01) {
-            const fx = dayX(ef.get(id)??0);
-            s += `<rect class="c-float" x="${fx}" y="${y+ROW_H*0.28}" width="${floatDays*DAY_W}" height="${ROW_H*0.44}" rx="1"/>`;
+          // Month label — always render at month boundary
+          if (mon!==lastMon) {
+            const label = DAY_W>=5
+              ? dt.toLocaleDateString('en-US',{month:'short',year:'numeric'}).toUpperCase()
+              : dt.toLocaleDateString('en-US',{month:'short'}).toUpperCase()+' '+dt.getFullYear();
+            s+=`<text class="c-month" x="${x+3}" y="13">${label}</text>`;
+            lastMon=mon;
           }
 
-          // Duration bar
-          const bX = dayX(bStart);
-          const bW = Math.max(d * DAY_W, 3);
-          let barClass;
-          if (isPast && isCrit)      barClass = 'c-bar-late-crit';
-          else if (isPast)           barClass = 'c-bar-late-norm';
-          else if (isCrit)           barClass = 'c-bar-crit';
-          else                       barClass = 'c-bar-norm';
-          s += `<rect class="${barClass}" x="${bX}" y="${y+ROW_H*0.28}" width="${bW}" height="${ROW_H*0.44}" rx="1"/>`;
+          // Day number + DOW
+          const cx=x+DAY_W/2;
+          if (DAY_W>=14) {
+            // All days
+            s+=`<text class="${isPast?'c-day-past':'c-day'}" x="${cx}" y="31" text-anchor="middle">${dt.getDate()}</text>`;
+            s+=`<text class="c-dow" x="${cx}" y="43" text-anchor="middle">${['S','M','T','W','T','F','S'][dt.getDay()]}</text>`;
+          } else if (DAY_W>=7 && isMonday) {
+            // Mondays only
+            s+=`<text class="${isPast?'c-day-past':'c-day'}" x="${x+2}" y="28" text-anchor="start" font-size="8">${dt.getDate()}</text>`;
+          }
+        }
+      }
+
+      // Today line
+      const todayX=dayX(0);
+      if (todayX>=NAME_W && todayX<=svgW-CAL_PAD) {
+        s+=`<line class="c-today" x1="${todayX}" y1="8" x2="${todayX}" y2="${svgH-CAL_PAD}"/>`;
+        s+=`<text class="c-marker" x="${todayX+3}" y="11" fill="#383838">TODAY</text>`;
+      }
+
+      // Target line
+      if (hasObj) {
+        const tx=dayX(targetDays);
+        s+=`<line class="c-target" x1="${tx}" y1="8" x2="${tx}" y2="${svgH-CAL_PAD}"/>`;
+        s+=`<text class="c-marker" x="${tx+3}" y="11" fill="rgba(255,255,255,.22)">TARGET</text>`;
+      }
+
+      // Item bars
+      let row=0;
+      for (const [id,item] of items) {
+        const d=durOf(id), y=HDR_H+row*ROW_H;
+        const isDone=item.complete, isCrit=critical.has(id);
+
+        s+=`<text class="${d>0?'c-name':'c-name-dim'}" x="${NAME_W-10}" y="${y+ROW_H/2+4}" text-anchor="end">${esc(trunc(label(id),20))}${isDone?' ✓':''}</text>`;
+
+        if (d>0) {
+          const bs=bStart(id), isPastBar=bs<0;
+
+          // Float indicator (forward mode only, non-critical)
+          if (!hasObj && !isCrit && !isDone) {
+            const fDays=(lf.get(id)??0)-(ef.get(id)??0);
+            if (fDays>0.01) s+=`<rect class="c-float" x="${dayX(ef.get(id)??0)}" y="${y+ROW_H*.28}" width="${fDays*DAY_W}" height="${ROW_H*.44}" rx="1"/>`;
+          }
+
+          // Choose bar color
+          let bc;
+          if (isDone)            bc='c-bar-done';
+          else if (isPastBar&&isCrit)  bc='c-bar-over-crit';
+          else if (isPastBar)          bc='c-bar-over-norm';
+          else if (isCrit)             bc='c-bar-crit';
+          else                         bc='c-bar-norm';
+
+          s+=`<rect class="${bc}" x="${dayX(bs)}" y="${y+ROW_H*.28}" width="${Math.max(d*DAY_W,3)}" height="${ROW_H*.44}" rx="1"/>`;
         }
         row++;
       }
 
-      svg.setAttribute('width', svgW);
-      svg.setAttribute('height', svgH);
-      svg.setAttribute('viewBox', `0 0 ${svgW} ${svgH}`);
-      svg.innerHTML = s;
+      svg.setAttribute('width',svgW); svg.setAttribute('height',svgH);
+      svg.setAttribute('viewBox',`0 0 ${svgW} ${svgH}`);
+      svg.innerHTML=s;
     }
 
-    function refresh() { renderGraph(); renderCalendar(); }
+    function refresh() { saveToStorage(); renderGraph(); renderCalendar(); }
 
     // ── Tabs ──────────────────────────────────────────────────────────────────
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
         btn.classList.add('active');
         document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
       });
     });
 
-    // ── Clock ─────────────────────────────────────────────────────────────────
-    const clockEl = document.getElementById('clock');
-    (function tick() {
-      clockEl.textContent = new Date().toLocaleTimeString('en-US',{hour12:false});
-      setTimeout(tick, 1000);
+    // ── Calendar zoom ────────────────────────────────────────────────────────
+    function applyZoom(factor) {
+      calZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, calZoom * factor));
+      document.getElementById('zoom-pct').textContent = Math.round(calZoom*100)+'%';
+      renderCalendar();
+    }
+
+    document.getElementById('zoom-in') .addEventListener('click', () => applyZoom(1.35));
+    document.getElementById('zoom-out').addEventListener('click', () => applyZoom(1/1.35));
+
+    // Ctrl+scroll on the calendar viewport
+    document.querySelector('.cal-viewport').addEventListener('wheel', e => {
+      if (!e.ctrlKey && !e.metaKey) return;
+      e.preventDefault();
+      applyZoom(e.deltaY < 0 ? 1.12 : 1/1.12);
+    }, { passive: false });
+
+    // ── Persistence ──────────────────────────────────────────────────────────
+    let projectName   = 'Untitled';
+    const AUTO_KEY    = 'cpm_auto_v1';
+    const NAMED_PFX   = 'cpm_named_';
+
+    function projectToJSON() {
+      return {
+        version: 1, projectName, nextId, objectiveId, objectiveDate,
+        items: [...items.values()].map(it => ({
+          id: it.id, name: it.name, duration: it.duration, stddev: it.stddev,
+          predecessors: [...it.predecessors], complete: it.complete
+        }))
+      };
+    }
+
+    function restoreFromJSON(data) {
+      items.clear();
+      projectName   = data.projectName  ?? 'Untitled';
+      nextId        = data.nextId        ?? 1;
+      objectiveId   = data.objectiveId   ?? null;
+      objectiveDate = data.objectiveDate ?? '';
+      for (const it of (data.items ?? [])) {
+        items.set(it.id, {
+          id: it.id, name: it.name ?? '', duration: it.duration ?? '',
+          stddev: it.stddev ?? '', predecessors: new Set(it.predecessors ?? []),
+          complete: it.complete ?? false
+        });
+      }
+      document.getElementById('proj-name').value = projectName;
+    }
+
+    // ── Auto-save (session recovery via localStorage) ────────────────────────
+    function saveToStorage() {
+      try { localStorage.setItem(AUTO_KEY, JSON.stringify(projectToJSON())); } catch (_) {}
+    }
+
+    // ── File System Access API ────────────────────────────────────────────────
+    // Saves/loads JSON files directly in a chosen directory (the repo root).
+    // The directory handle is persisted in IndexedDB so you only pick once.
+    // Falls back silently to localStorage-only if the API is unavailable.
+
+    const FS_OK = typeof window.showDirectoryPicker === 'function';
+    let dirHandle = null;
+
+    // Minimal IndexedDB key-value helpers
+    const _idb = () => new Promise((res, rej) => {
+      const r = indexedDB.open('cpm_fs', 1);
+      r.onupgradeneeded = e => e.target.result.createObjectStore('kv');
+      r.onsuccess = e => res(e.target.result);
+      r.onerror   = rej;
+    });
+    const idbGet = async k => { const db=await _idb(); return new Promise((res,rej)=>{ const r=db.transaction('kv').objectStore('kv').get(k); r.onsuccess=()=>res(r.result); r.onerror=rej; }); };
+    const idbPut = async (k,v) => { const db=await _idb(); return new Promise((res,rej)=>{ const tx=db.transaction('kv','readwrite'); tx.objectStore('kv').put(v,k); tx.oncomplete=res; tx.onerror=rej; }); };
+
+    function setDirLabel(name) {
+      const el = document.getElementById('dir-label');
+      if (el) el.textContent = name ? `folder: ${name}` : '';
+    }
+
+    // Acquire (or re-acquire) the directory handle.
+    // forcePick=true opens the picker even if a handle already exists.
+    async function getDir(forcePick = false) {
+      if (!FS_OK) return null;
+      // Try restoring from IndexedDB on first call
+      if (!dirHandle && !forcePick) {
+        try { dirHandle = await idbGet('dirHandle'); } catch (_) {}
+      }
+      // Pick a new directory if needed
+      if (!dirHandle || forcePick) {
+        try {
+          dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+          await idbPut('dirHandle', dirHandle);
+        } catch (_) { return null; } // user cancelled
+      }
+      // Verify / request permission
+      try {
+        let p = await dirHandle.queryPermission({ mode: 'readwrite' });
+        if (p !== 'granted') p = await dirHandle.requestPermission({ mode: 'readwrite' });
+        if (p !== 'granted') { dirHandle = null; return null; }
+      } catch (_) { dirHandle = null; return null; }
+      setDirLabel(dirHandle.name);
+      return dirHandle;
+    }
+
+    const safeFSName = n => ((n||'untitled').trim().replace(/[^\w\-]/g,'_') || 'untitled') + '.json';
+
+    async function fsWrite(projectNameArg) {
+      const dir = await getDir();
+      if (!dir) return false;
+      try {
+        const fh = await dir.getFileHandle(safeFSName(projectNameArg), { create: true });
+        const w  = await fh.createWritable();
+        await w.write(JSON.stringify(projectToJSON(), null, 2));
+        await w.close();
+        return true;
+      } catch (_) { return false; }
+    }
+
+    async function fsRead(projectNameArg) {
+      const dir = await getDir();
+      if (!dir) return null;
+      try {
+        const fh   = await dir.getFileHandle(safeFSName(projectNameArg));
+        return JSON.parse(await (await fh.getFile()).text());
+      } catch (_) { return null; }
+    }
+
+    async function fsDelete(projectNameArg) {
+      const dir = await getDir();
+      if (!dir) return;
+      try { await dir.removeEntry(safeFSName(projectNameArg)); } catch (_) {}
+    }
+
+    async function fsList() {
+      const dir = await getDir();
+      if (!dir) return null; // null = API not available
+      const names = [];
+      try {
+        for await (const [fname, handle] of dir.entries())
+          if (handle.kind === 'file' && fname.endsWith('.json'))
+            names.push(fname.slice(0, -5));
+      } catch (_) {}
+      return names.sort((a, b) => a.localeCompare(b));
+    }
+
+    // ── Project name input ────────────────────────────────────────────────────
+    document.getElementById('proj-name').addEventListener('input', e => {
+      projectName = e.target.value;
+    });
+
+    // ── New ──────────────────────────────────────────────────────────────────
+    document.getElementById('new-btn').addEventListener('click', () => {
+      if (items.size > 0 && !confirm('Start a new project? Unsaved changes will be lost.')) return;
+      items.clear();
+      nextId = 1; objectiveId = null; objectiveDate = '';
+      projectName = 'Untitled';
+      document.getElementById('proj-name').value = 'Untitled';
+      renderTable(); refresh();
+    });
+
+    // ── Save ─────────────────────────────────────────────────────────────────
+    document.getElementById('save-btn').addEventListener('click', async () => {
+      let name = (projectName || '').trim();
+      if (!name || name.toLowerCase() === 'untitled') {
+        name = (prompt('Project name:', name || '') ?? '').trim();
+        if (!name) return;
+        projectName = name;
+        document.getElementById('proj-name').value = name;
+      }
+      const btn = document.getElementById('save-btn');
+      btn.textContent = 'Saving…';
+      const ok = await fsWrite(name);
+      if (!ok) {
+        // FS unavailable — fall back to localStorage
+        try { localStorage.setItem(NAMED_PFX + name, JSON.stringify(projectToJSON())); }
+        catch (_) { btn.textContent = 'Error'; setTimeout(()=>{ btn.textContent='Save'; },1400); return; }
+      }
+      saveToStorage();
+      btn.textContent = 'Saved ✓';
+      setTimeout(() => { btn.textContent = 'Save'; }, 1400);
+    });
+
+    // ── Open panel ───────────────────────────────────────────────────────────
+    const openBackdrop = document.getElementById('open-backdrop');
+    const openPanel    = document.getElementById('open-panel');
+
+    function makeOpenRow(name, onLoad, onDel) {
+      const row = document.createElement('div');
+      row.className = 'open-proj-row';
+      const lbl = document.createElement('span');
+      lbl.textContent = name; lbl.style.flexGrow = '1';
+      lbl.addEventListener('click', onLoad);
+      const del = document.createElement('button');
+      del.className = 'open-proj-del'; del.textContent = '×'; del.title = 'Delete';
+      del.addEventListener('click', e => { e.stopPropagation(); onDel(); });
+      row.append(lbl, del);
+      return row;
+    }
+
+    async function refreshOpenPanel() {
+      openPanel.innerHTML = '<div class="open-proj-empty">Loading…</div>';
+
+      const fsNames = await fsList();          // null if FS unavailable
+      const lsNames = (() => {                 // localStorage fallback list
+        const a = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k?.startsWith(NAMED_PFX)) a.push(k.slice(NAMED_PFX.length));
+        }
+        return a.sort((a,b) => a.localeCompare(b));
+      })();
+
+      openPanel.innerHTML = '';
+
+      if (fsNames && fsNames.length) {
+        for (const name of fsNames) {
+          openPanel.appendChild(makeOpenRow(name,
+            async () => {
+              const data = await fsRead(name);
+              if (data) { restoreFromJSON(data); renderTable(); refresh(); }
+              closeOpenPanel();
+            },
+            async () => {
+              if (confirm(`Delete "${name}.json" from the project folder?`)) {
+                await fsDelete(name); refreshOpenPanel();
+              }
+            }
+          ));
+        }
+      } else if (lsNames.length) {
+        // FS not available — show localStorage saves
+        for (const name of lsNames) {
+          openPanel.appendChild(makeOpenRow(name,
+            () => {
+              try { restoreFromJSON(JSON.parse(localStorage.getItem(NAMED_PFX+name))); renderTable(); refresh(); }
+              catch (_) {}
+              closeOpenPanel();
+            },
+            () => {
+              if (confirm(`Delete saved project "${name}"?`)) {
+                localStorage.removeItem(NAMED_PFX+name); refreshOpenPanel();
+              }
+            }
+          ));
+        }
+      } else {
+        openPanel.innerHTML = '<div class="open-proj-empty">No saved projects</div>';
+      }
+    }
+
+    async function showOpenPanel() {
+      const r = document.getElementById('open-btn').getBoundingClientRect();
+      openPanel.style.left = `${Math.min(r.left, window.innerWidth - 224)}px`;
+      openPanel.style.top  = `${r.bottom + 4}px`;
+      openPanel.hidden = openBackdrop.hidden = false;
+      await refreshOpenPanel();
+    }
+
+    function closeOpenPanel() { openPanel.hidden = openBackdrop.hidden = true; }
+
+    document.getElementById('open-btn').addEventListener('click', showOpenPanel);
+    openBackdrop.addEventListener('click', closeOpenPanel);
+
+    // ── Export (download) ────────────────────────────────────────────────────
+    document.getElementById('export-btn').addEventListener('click', () => {
+      const safe = (projectName || 'critical-path').replace(/[^\w\-]/g, '_');
+      const a = Object.assign(document.createElement('a'), {
+        href: URL.createObjectURL(new Blob([JSON.stringify(projectToJSON(), null, 2)], {type:'application/json'})),
+        download: `${safe}.json`
+      });
+      a.click(); URL.revokeObjectURL(a.href);
+    });
+
+    // ── Import (file picker) ─────────────────────────────────────────────────
+    const importInput = document.getElementById('import-input');
+    document.getElementById('import-btn').addEventListener('click', () => importInput.click());
+    importInput.addEventListener('change', e => {
+      const file = e.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try { restoreFromJSON(JSON.parse(ev.target.result)); renderTable(); refresh(); }
+        catch (_) { alert('Could not read file — make sure it is a valid Critical Path JSON export.'); }
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    });
+
+    // ── Startup ──────────────────────────────────────────────────────────────
+    // Restore last session, then silently try to restore the FS directory handle
+    // so the folder label appears without forcing a permission prompt.
+    (async () => {
+      try {
+        const raw = localStorage.getItem(AUTO_KEY);
+        if (raw) { restoreFromJSON(JSON.parse(raw)); renderTable(); refresh(); }
+      } catch (_) {}
+      if (FS_OK) {
+        try {
+          const h = await idbGet('dirHandle');
+          if (h) {
+            const p = await h.queryPermission({ mode: 'readwrite' });
+            if (p === 'granted') { dirHandle = h; setDirLabel(h.name); }
+          }
+        } catch (_) {}
+      }
     })();
+
+    // ── Clock ─────────────────────────────────────────────────────────────────
+    const clockEl=document.getElementById('clock');
+    (function tick(){ clockEl.textContent=new Date().toLocaleTimeString('en-US',{hour12:false}); setTimeout(tick,1000); })();
   </script>
 </body>
 </html>
