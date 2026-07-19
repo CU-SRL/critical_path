@@ -188,6 +188,14 @@
     .proj-name-input:focus { color:var(--text); border-bottom-color:#444; }
     .hdr-btn { background:none; border:1px solid var(--brd); color:var(--muted); font-family:'Inter',sans-serif; font-weight:300; font-size:.54rem; letter-spacing:.2em; text-transform:uppercase; padding:.28rem .7rem; cursor:pointer; transition:color .15s,border-color .15s; }
     .hdr-btn:hover { color:var(--text); border-color:#3a3a3a; }
+    .user-email { font-size:.56rem; letter-spacing:.05em; color:var(--muted); max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+    /* ── Auth gate ── */
+    #auth-gate { position:fixed; inset:0; z-index:500; background:var(--bg); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:1.25rem; }
+    #auth-gate h1 { font-size:1.55rem; font-weight:300; letter-spacing:.2em; text-transform:uppercase; }
+    #auth-gate p { font-size:.68rem; letter-spacing:.05em; color:var(--muted); max-width:320px; text-align:center; line-height:1.6; }
+    #auth-gate .hdr-btn { font-size:.62rem; padding:.6rem 1.4rem; }
+    #auth-error { font-size:.6rem; color:#e06; letter-spacing:.03em; max-width:320px; text-align:center; }
 
     /* ── Open-project panel ── */
     #open-backdrop { position:fixed; inset:0; z-index:99; }
@@ -201,7 +209,7 @@
     /* ── Footer ── */
     footer { flex-shrink:0; display:flex; align-items:center; justify-content:space-between; padding:0 2.5rem; height:34px; border-top:1px solid var(--brd); font-size:.56rem; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); }
     .footer-left { display:flex; gap:2rem; }
-    #dir-label { color:#2a2a2a; }
+    #sync-label { color:#2a2a2a; }
   </style>
 </head>
 <body>
@@ -212,11 +220,12 @@
     <div class="header-actions">
       <input class="proj-name-input" id="proj-name" type="text" value="Untitled" placeholder="Project name" spellcheck="false" />
       <button class="hdr-btn" id="new-btn">New</button>
-      <button class="hdr-btn" id="save-btn">Save</button>
       <button class="hdr-btn" id="open-btn">Open</button>
       <button class="hdr-btn" id="export-btn">Export</button>
       <button class="hdr-btn" id="import-btn">Import</button>
       <input type="file" id="import-input" accept=".json" hidden />
+      <span class="user-email" id="user-email"></span>
+      <button class="hdr-btn" id="signout-btn" style="display:none;">Sign out</button>
     </div>
   </header>
 
@@ -282,7 +291,7 @@
   </main>
 
   <footer>
-    <div class="footer-left"><span>CPM v0.1.0</span><span>Mode: Analysis</span><span id="dir-label"></span></div>
+    <div class="footer-left"><span>CPM v0.1.0</span><span>Mode: Analysis</span><span id="sync-label"></span></div>
     <span id="clock"></span>
   </footer>
 
@@ -292,11 +301,76 @@
   <div id="open-backdrop" hidden></div>
   <div id="open-panel" hidden></div>
 
-  <script>
+  <div id="auth-gate">
+    <h1>Critical Path</h1>
+    <p>Sign in with your Google account to view and edit shared projects. Everyone who signs in sees the same live project list.</p>
+    <button class="hdr-btn" id="google-signin-btn">Sign in with Google</button>
+    <div id="auth-error"></div>
+  </div>
+
+  <script type="module">
+    // ── Firebase ─────────────────────────────────────────────────────────────
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import {
+      getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+    import {
+      getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, getDoc, getDocs,
+      onSnapshot, serverTimestamp, query, orderBy, writeBatch
+    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+    // Firebase web config is not a secret — access control is enforced by
+    // Firestore security rules (see project setup notes), not by hiding this.
+    const firebaseConfig = {
+      apiKey: "AIzaSyBc743on6w_X2C-xvkakAM7qz1070HSTts",
+      authDomain: "critical-path-8f35b.firebaseapp.com",
+      projectId: "critical-path-8f35b",
+      storageBucket: "critical-path-8f35b.firebasestorage.app",
+      messagingSenderId: "1068393790693",
+      appId: "1:1068393790693:web:bd521929bbdf957daee80c"
+    };
+
+    const fbApp = initializeApp(firebaseConfig);
+    const auth  = getAuth(fbApp);
+    const db    = getFirestore(fbApp);
+    const googleProvider = new GoogleAuthProvider();
+
+    let currentUser = null;
+
+    document.getElementById('google-signin-btn').addEventListener('click', () => {
+      document.getElementById('auth-error').textContent = '';
+      signInWithPopup(auth, googleProvider).catch(err => {
+        document.getElementById('auth-error').textContent = 'Sign-in failed: ' + err.message;
+      });
+    });
+    document.getElementById('signout-btn').addEventListener('click', () => signOut(auth));
+
+    onAuthStateChanged(auth, user => {
+      currentUser = user;
+      const gate = document.getElementById('auth-gate');
+      const emailEl = document.getElementById('user-email');
+      const signoutBtn = document.getElementById('signout-btn');
+      if (user) {
+        gate.style.display = 'none';
+        emailEl.textContent = user.email || user.displayName || '';
+        signoutBtn.style.display = '';
+        initProjects();
+      } else {
+        gate.style.display = 'flex';
+        emailEl.textContent = '';
+        signoutBtn.style.display = 'none';
+        teardownProjectListeners();
+        items.clear(); currentProjectId = null;
+        renderTable(); renderGraph(); renderCalendar();
+      }
+    });
+
     // ── State ──────────────────────────────────────────────────────────────────
     // item: { id, name, duration, stddev, predecessors: Set<id>, complete: bool }
     const items = new Map();
-    let nextId = 1, activePicker = null, objectiveId = null, objectiveDate = '';
+    let activePicker = null, objectiveId = null, objectiveDate = '';
+    // Timestamp+random ids avoid collisions when two people add items at the same instant.
+    const genId = () => Date.now()*1000 + Math.floor(Math.random()*1000);
 
     // ── Utilities ──────────────────────────────────────────────────────────────
     const esc    = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -444,18 +518,28 @@
     }
 
     // ── CRUD ──────────────────────────────────────────────────────────────────
-    function addItem() {
-      const id=nextId++;
+    async function addItem() {
+      if (!currentProjectId) return;
+      const id=genId();
       items.set(id,{id,name:'',duration:'',stddev:'',comments:'',predecessors:new Set(),complete:false});
       renderTable(); refresh();
       document.querySelector(`[data-id="${id}"][data-field="name"]`)?.focus();
+      await setDoc(itemDocRef(currentProjectId,id), {
+        name:'', duration:'', stddev:'', comments:'', predecessors:[], complete:false
+      });
+      writeProjectFields({ order:[...items.keys()] });
     }
 
     function removeItem(id) {
       if (objectiveId===id) { objectiveId=null; objectiveDate=''; }
       items.delete(id);
-      for (const it of items.values()) it.predecessors.delete(id);
+      const affected=[];
+      for (const [oid,it] of items) if (it.predecessors.delete(id)) affected.push(oid);
       closePicker(); renderTable(); refresh();
+      if (!currentProjectId) return;
+      deleteDoc(itemDocRef(currentProjectId,id)).catch(()=>{});
+      writeProjectFields({ objectiveId, objectiveDate, order:[...items.keys()] });
+      for (const oid of affected) writeItemFieldNow(oid,'predecessors',[...items.get(oid).predecessors]);
     }
 
     function updateField(id,field,value) {
@@ -463,6 +547,7 @@
       it[field]=value;
       if (field==='name') for (const [oid,o] of items) if (o.predecessors.has(id)) refreshChips(oid);
       refresh();
+      writeItemField(id,field,value);
     }
 
     function togglePred(itemId,predId) {
@@ -470,12 +555,14 @@
       if (it.predecessors.has(predId)) it.predecessors.delete(predId);
       else { if (wouldCycle(itemId,predId)) return; it.predecessors.add(predId); }
       refreshChips(itemId); refresh();
+      writeItemFieldNow(itemId,'predecessors',[...it.predecessors]);
     }
 
     function toggleObjective(id) {
       objectiveId = (objectiveId===id) ? null : id;
       if (!objectiveId) objectiveDate='';
       renderTable(); refresh();
+      writeProjectFields({ objectiveId, objectiveDate });
     }
 
     function toggleComplete(id) {
@@ -487,6 +574,7 @@
       const btn=document.querySelector(`[data-complete="${id}"]`);
       if (btn) btn.classList.toggle('active',it.complete);
       refresh();
+      writeItemFieldNow(id,'complete',it.complete);
     }
 
     // ── Table rendering ────────────────────────────────────────────────────────
@@ -543,7 +631,7 @@
     document.getElementById('tbody').addEventListener('input', e => {
       if (e.target.tagName==='TEXTAREA') autoResize(e.target);
       if (e.target.dataset.field)    updateField(+e.target.dataset.id, e.target.dataset.field, e.target.value);
-      if (e.target.dataset.objDate!==undefined) { objectiveDate=e.target.value; refresh(); }
+      if (e.target.dataset.objDate!==undefined) { objectiveDate=e.target.value; refresh(); writeProjectFields({objectiveDate}); }
     });
 
     document.getElementById('tbody').addEventListener('click', e => {
@@ -810,7 +898,7 @@
       barsSvg.innerHTML=bars;
     }
 
-    function refresh() { saveToStorage(); renderGraph(); renderCalendar(); }
+    function refresh() { renderGraph(); renderCalendar(); }
 
     // ── Tabs ──────────────────────────────────────────────────────────────────
     document.querySelectorAll('.tab-btn').forEach(btn=>{
@@ -896,18 +984,34 @@
       if (!tr||dragSrcId===null) return;
       const toId=+tr.dataset.rowId;
       tbody.querySelectorAll('tr.drag-over').forEach(r=>r.classList.remove('drag-over'));
-      if (dragSrcId!==toId) { reorderItems(dragSrcId,toId); renderTable(); refresh(); }
+      if (dragSrcId!==toId) { reorderItems(dragSrcId,toId); renderTable(); refresh(); writeProjectFields({order:[...items.keys()]}); }
       dragSrcId=null; dragFromHandle=false;
     });
 
-    // ── Persistence ──────────────────────────────────────────────────────────
-    let projectName   = 'Untitled';
-    const AUTO_KEY    = 'cpm_auto_v1';
-    const NAMED_PFX   = 'cpm_named_';
+    // ── Persistence (shared, Firestore-backed) ────────────────────────────────
+    // Every project lives in Firestore under projects/{id}, with each item as
+    // its own doc in a projects/{id}/items subcollection. Everyone signed in
+    // reads/writes the same documents, and onSnapshot listeners below push
+    // remote edits into the local view live, Google-Docs-style.
+    let projectName      = 'Untitled';
+    let currentProjectId = null;
+    let unsubProject = null, unsubItems = null;
+    let remoteOrder = [];
+    const LAST_PROJECT_KEY = 'cpm_last_project_id'; // device-local pointer only, not data
+
+    const projectsCol   = () => collection(db, 'projects');
+    const projectDocRef = pid => doc(db, 'projects', pid);
+    const itemsColRef   = pid => collection(db, 'projects', pid, 'items');
+    const itemDocRef    = (pid,id) => doc(db, 'projects', pid, 'items', String(id));
+
+    function setSyncLabel(text) {
+      const el = document.getElementById('sync-label');
+      if (el) el.textContent = text;
+    }
 
     function projectToJSON() {
       return {
-        version: 1, projectName, nextId, objectiveId, objectiveDate,
+        version: 1, projectName, objectiveId, objectiveDate,
         items: [...items.values()].map(it => ({
           id: it.id, name: it.name, duration: it.duration, stddev: it.stddev,
           comments: it.comments, predecessors: [...it.predecessors], complete: it.complete
@@ -915,154 +1019,199 @@
       };
     }
 
-    function restoreFromJSON(data) {
+    // ── Writes (local edit → Firestore) ───────────────────────────────────────
+    const fieldTimers = new Map();
+    const FIELD_DEBOUNCE = 400;
+
+    function writeItemField(id, field, value) {
+      if (!currentProjectId) return;
+      const key = `${id}:${field}`;
+      clearTimeout(fieldTimers.get(key));
+      setSyncLabel('Syncing…');
+      fieldTimers.set(key, setTimeout(() => {
+        updateDoc(itemDocRef(currentProjectId,id), { [field]: value })
+          .then(()=>setSyncLabel('Synced')).catch(()=>setSyncLabel('Sync failed'));
+      }, FIELD_DEBOUNCE));
+    }
+
+    function writeItemFieldNow(id, field, value) {
+      if (!currentProjectId) return;
+      setSyncLabel('Syncing…');
+      updateDoc(itemDocRef(currentProjectId,id), { [field]: value })
+        .then(()=>setSyncLabel('Synced')).catch(()=>setSyncLabel('Sync failed'));
+    }
+
+    function writeProjectFields(fields) {
+      if (!currentProjectId) return;
+      setSyncLabel('Syncing…');
+      updateDoc(projectDocRef(currentProjectId), {
+        ...fields, updatedAt: serverTimestamp(), updatedBy: currentUser?.email||''
+      }).then(()=>setSyncLabel('Synced')).catch(()=>setSyncLabel('Sync failed'));
+    }
+
+    // ── Reads (Firestore → local view) ────────────────────────────────────────
+    function isFocused(id, field) {
+      const el = document.querySelector(`[data-id="${id}"][data-field="${field}"]`);
+      return !!el && document.activeElement === el;
+    }
+
+    // Reorders the local `items` Map to match `order`, appending any local
+    // items missing from it (e.g. just-added, not yet reflected remotely).
+    function applyRemoteOrder(order) {
+      const next = new Map();
+      for (const id of order) if (items.has(id)) next.set(id, items.get(id));
+      for (const [id,it] of items) if (!next.has(id)) next.set(id, it);
       items.clear();
-      projectName   = data.projectName  ?? 'Untitled';
-      nextId        = data.nextId        ?? 1;
-      objectiveId   = data.objectiveId   ?? null;
-      objectiveDate = data.objectiveDate ?? '';
-      for (const it of (data.items ?? [])) {
-        items.set(it.id, {
-          id: it.id, name: it.name ?? '', duration: it.duration ?? '',
-          stddev: it.stddev ?? '', comments: it.comments ?? '',
-          predecessors: new Set(it.predecessors ?? []), complete: it.complete ?? false
-        });
+      for (const [id,it] of next) items.set(id, it);
+    }
+
+    function patchItemFromRemote(id, d) {
+      const it = items.get(id); if (!it) return;
+
+      if (typeof d.name === 'string' && !isFocused(id,'name') && it.name !== d.name) {
+        it.name = d.name;
+        const el = document.querySelector(`[data-id="${id}"][data-field="name"]`);
+        if (el) { el.value = d.name; autoResize(el); }
+        for (const [oid,o] of items) if (o.predecessors.has(id)) refreshChips(oid);
       }
-      document.getElementById('proj-name').value = projectName;
-    }
-
-    // ── Auto-save (session recovery via localStorage) ────────────────────────
-    function saveToStorage() {
-      try { localStorage.setItem(AUTO_KEY, JSON.stringify(projectToJSON())); } catch (_) {}
-    }
-
-    // ── File System Access API ────────────────────────────────────────────────
-    // Saves/loads JSON files directly in a chosen directory (the repo root).
-    // The directory handle is persisted in IndexedDB so you only pick once.
-    // Falls back silently to localStorage-only if the API is unavailable.
-
-    const FS_OK = typeof window.showDirectoryPicker === 'function';
-    let dirHandle = null;
-
-    // Minimal IndexedDB key-value helpers
-    const _idb = () => new Promise((res, rej) => {
-      const r = indexedDB.open('cpm_fs', 1);
-      r.onupgradeneeded = e => e.target.result.createObjectStore('kv');
-      r.onsuccess = e => res(e.target.result);
-      r.onerror   = rej;
-    });
-    const idbGet = async k => { const db=await _idb(); return new Promise((res,rej)=>{ const r=db.transaction('kv').objectStore('kv').get(k); r.onsuccess=()=>res(r.result); r.onerror=rej; }); };
-    const idbPut = async (k,v) => { const db=await _idb(); return new Promise((res,rej)=>{ const tx=db.transaction('kv','readwrite'); tx.objectStore('kv').put(v,k); tx.oncomplete=res; tx.onerror=rej; }); };
-
-    function setDirLabel(name) {
-      const el = document.getElementById('dir-label');
-      if (el) el.textContent = name ? `folder: ${name}` : '';
-    }
-
-    // Acquire (or re-acquire) the directory handle.
-    // forcePick=true opens the picker even if a handle already exists.
-    async function getDir(forcePick = false) {
-      if (!FS_OK) return null;
-      // Try restoring from IndexedDB on first call
-      if (!dirHandle && !forcePick) {
-        try { dirHandle = await idbGet('dirHandle'); } catch (_) {}
+      if (typeof d.comments === 'string' && !isFocused(id,'comments') && it.comments !== d.comments) {
+        it.comments = d.comments;
+        const el = document.querySelector(`[data-id="${id}"][data-field="comments"]`);
+        if (el) { el.value = d.comments; autoResize(el); }
       }
-      // Pick a new directory if needed
-      if (!dirHandle || forcePick) {
-        try {
-          dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
-          await idbPut('dirHandle', dirHandle);
-        } catch (_) { return null; } // user cancelled
+      if (d.duration !== undefined && !isFocused(id,'duration') && it.duration !== d.duration) {
+        it.duration = d.duration;
+        const el = document.querySelector(`[data-id="${id}"][data-field="duration"]`);
+        if (el) el.value = d.duration;
       }
-      // Verify / request permission
-      try {
-        let p = await dirHandle.queryPermission({ mode: 'readwrite' });
-        if (p !== 'granted') p = await dirHandle.requestPermission({ mode: 'readwrite' });
-        if (p !== 'granted') { dirHandle = null; return null; }
-      } catch (_) { dirHandle = null; return null; }
-      setDirLabel(dirHandle.name);
-      return dirHandle;
+      if (d.stddev !== undefined && !isFocused(id,'stddev') && it.stddev !== d.stddev) {
+        it.stddev = d.stddev;
+        const el = document.querySelector(`[data-id="${id}"][data-field="stddev"]`);
+        if (el) el.value = d.stddev;
+      }
+      if (Array.isArray(d.predecessors)) {
+        const newSet = new Set(d.predecessors);
+        const same = newSet.size===it.predecessors.size && [...newSet].every(x=>it.predecessors.has(x));
+        if (!same) { it.predecessors = newSet; refreshChips(id); }
+      }
+      if (typeof d.complete === 'boolean' && d.complete !== it.complete) {
+        it.complete = d.complete;
+        const tr=document.querySelector(`tr[data-row-id="${id}"]`);
+        if (tr) tr.classList.toggle('is-complete', it.complete);
+        const btn=document.querySelector(`[data-complete="${id}"]`);
+        if (btn) btn.classList.toggle('active', it.complete);
+      }
     }
 
-    const safeFSName = n => ((n||'untitled').trim().replace(/[^\w\-]/g,'_') || 'untitled') + '.json';
-
-    async function fsWrite(projectNameArg) {
-      const dir = await getDir();
-      if (!dir) return false;
-      try {
-        const fh = await dir.getFileHandle(safeFSName(projectNameArg), { create: true });
-        const w  = await fh.createWritable();
-        await w.write(JSON.stringify(projectToJSON(), null, 2));
-        await w.close();
-        return true;
-      } catch (_) { return false; }
+    function teardownProjectListeners() {
+      if (unsubProject) unsubProject();
+      if (unsubItems)   unsubItems();
+      unsubProject = unsubItems = null;
+      currentProjectId = null;
+      setSyncLabel('');
     }
 
-    async function fsRead(projectNameArg) {
-      const dir = await getDir();
-      if (!dir) return null;
-      try {
-        const fh   = await dir.getFileHandle(safeFSName(projectNameArg));
-        return JSON.parse(await (await fh.getFile()).text());
-      } catch (_) { return null; }
+    function subscribeToProject(pid) {
+      teardownProjectListeners();
+      currentProjectId = pid;
+      try { localStorage.setItem(LAST_PROJECT_KEY, pid); } catch (_) {}
+
+      unsubProject = onSnapshot(projectDocRef(pid), snap => {
+        if (!snap.exists()) return;
+        const d = snap.data();
+        projectName = d.name ?? 'Untitled';
+        const nameInput = document.getElementById('proj-name');
+        if (document.activeElement !== nameInput) nameInput.value = projectName;
+
+        const newObjId = d.objectiveId ?? null, newObjDate = d.objectiveDate ?? '';
+        const objChanged = newObjId!==objectiveId || newObjDate!==objectiveDate;
+        objectiveId = newObjId; objectiveDate = newObjDate;
+
+        remoteOrder = d.order ?? [];
+        const orderChanged = remoteOrder.join(',') !== [...items.keys()].join(',');
+        if (orderChanged) applyRemoteOrder(remoteOrder);
+
+        if (objChanged || orderChanged) renderTable();
+        refresh();
+      }, () => setSyncLabel('Sync failed'));
+
+      unsubItems = onSnapshot(itemsColRef(pid), snap => {
+        let structural = false;
+        for (const ch of snap.docChanges()) {
+          const id = +ch.doc.id;
+          if (ch.type === 'removed') {
+            if (items.has(id)) { items.delete(id); structural = true; }
+            continue;
+          }
+          const d = ch.doc.data();
+          if (!items.has(id)) {
+            items.set(id, {
+              id, name: d.name??'', duration: d.duration??'', stddev: d.stddev??'',
+              comments: d.comments??'', predecessors: new Set(d.predecessors??[]), complete: d.complete??false
+            });
+            structural = true;
+          } else {
+            patchItemFromRemote(id, d);
+          }
+        }
+        if (structural) { applyRemoteOrder(remoteOrder); renderTable(); }
+        refresh();
+      }, () => setSyncLabel('Sync failed'));
     }
 
-    async function fsDelete(projectNameArg) {
-      const dir = await getDir();
-      if (!dir) return;
-      try { await dir.removeEntry(safeFSName(projectNameArg)); } catch (_) {}
-    }
-
-    async function fsList() {
-      const dir = await getDir();
-      if (!dir) return null; // null = API not available
-      const names = [];
-      try {
-        for await (const [fname, handle] of dir.entries())
-          if (handle.kind === 'file' && fname.endsWith('.json'))
-            names.push(fname.slice(0, -5));
-      } catch (_) {}
-      return names.sort((a, b) => a.localeCompare(b));
-    }
-
-    // ── Project name input ────────────────────────────────────────────────────
+    // ── Project name (live-synced, debounced) ─────────────────────────────────
     document.getElementById('proj-name').addEventListener('input', e => {
       projectName = e.target.value;
+      clearTimeout(fieldTimers.get('proj:name'));
+      setSyncLabel('Syncing…');
+      fieldTimers.set('proj:name', setTimeout(() => writeProjectFields({ name: projectName }), FIELD_DEBOUNCE));
     });
+
+    // ── Create / switch projects ──────────────────────────────────────────────
+    async function createNewProject(name, importedItems = null, meta = null) {
+      const ref = doc(projectsCol());
+      const pid = ref.id;
+      await setDoc(ref, {
+        name, objectiveId: meta?.objectiveId ?? null, objectiveDate: meta?.objectiveDate ?? '',
+        order: meta?.order ?? [],
+        createdAt: serverTimestamp(), updatedAt: serverTimestamp(), updatedBy: currentUser?.email||''
+      });
+      if (importedItems?.length) {
+        const batch = writeBatch(db);
+        for (const it of importedItems) {
+          batch.set(doc(itemsColRef(pid), String(it.id)), {
+            name: it.name, duration: it.duration, stddev: it.stddev,
+            comments: it.comments, predecessors: it.predecessors, complete: it.complete
+          });
+        }
+        await batch.commit();
+      }
+      items.clear();
+      objectiveId   = meta?.objectiveId ?? null;
+      objectiveDate = meta?.objectiveDate ?? '';
+      projectName   = name;
+      document.getElementById('proj-name').value = name;
+      subscribeToProject(pid);
+      renderTable(); refresh();
+    }
+
+    async function deleteProjectDeep(pid) {
+      const itemSnaps = await getDocs(itemsColRef(pid));
+      const batch = writeBatch(db);
+      itemSnaps.forEach(s => batch.delete(s.ref));
+      batch.delete(projectDocRef(pid));
+      await batch.commit();
+    }
 
     // ── New ──────────────────────────────────────────────────────────────────
-    document.getElementById('new-btn').addEventListener('click', () => {
-      if (items.size > 0 && !confirm('Start a new project? Unsaved changes will be lost.')) return;
-      items.clear();
-      nextId = 1; objectiveId = null; objectiveDate = '';
-      projectName = 'Untitled';
-      document.getElementById('proj-name').value = 'Untitled';
-      renderTable(); refresh();
+    document.getElementById('new-btn').addEventListener('click', async () => {
+      if (!currentUser) return;
+      const name = (prompt('New project name:', 'Untitled') ?? '').trim();
+      if (!name) return;
+      await createNewProject(name);
     });
 
-    // ── Save ─────────────────────────────────────────────────────────────────
-    document.getElementById('save-btn').addEventListener('click', async () => {
-      let name = (projectName || '').trim();
-      if (!name || name.toLowerCase() === 'untitled') {
-        name = (prompt('Project name:', name || '') ?? '').trim();
-        if (!name) return;
-        projectName = name;
-        document.getElementById('proj-name').value = name;
-      }
-      const btn = document.getElementById('save-btn');
-      btn.textContent = 'Saving…';
-      const ok = await fsWrite(name);
-      if (!ok) {
-        // FS unavailable — fall back to localStorage
-        try { localStorage.setItem(NAMED_PFX + name, JSON.stringify(projectToJSON())); }
-        catch (_) { btn.textContent = 'Error'; setTimeout(()=>{ btn.textContent='Save'; },1400); return; }
-      }
-      saveToStorage();
-      btn.textContent = 'Saved ✓';
-      setTimeout(() => { btn.textContent = 'Save'; }, 1400);
-    });
-
-    // ── Open panel ───────────────────────────────────────────────────────────
+    // ── Open panel (lists shared projects from Firestore) ─────────────────────
     const openBackdrop = document.getElementById('open-backdrop');
     const openPanel    = document.getElementById('open-panel');
 
@@ -1081,53 +1230,27 @@
 
     async function refreshOpenPanel() {
       openPanel.innerHTML = '<div class="open-proj-empty">Loading…</div>';
-
-      const fsNames = await fsList();          // null if FS unavailable
-      const lsNames = (() => {                 // localStorage fallback list
-        const a = [];
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (k?.startsWith(NAMED_PFX)) a.push(k.slice(NAMED_PFX.length));
-        }
-        return a.sort((a,b) => a.localeCompare(b));
-      })();
+      let snaps;
+      try { snaps = await getDocs(query(projectsCol(), orderBy('updatedAt','desc'))); }
+      catch (_) { openPanel.innerHTML = '<div class="open-proj-empty">Could not load projects</div>'; return; }
 
       openPanel.innerHTML = '';
+      if (snaps.empty) { openPanel.innerHTML = '<div class="open-proj-empty">No projects yet</div>'; return; }
 
-      if (fsNames && fsNames.length) {
-        for (const name of fsNames) {
-          openPanel.appendChild(makeOpenRow(name,
-            async () => {
-              const data = await fsRead(name);
-              if (data) { restoreFromJSON(data); renderTable(); refresh(); }
-              closeOpenPanel();
-            },
-            async () => {
-              if (confirm(`Delete "${name}.json" from the project folder?`)) {
-                await fsDelete(name); refreshOpenPanel();
-              }
+      snaps.forEach(snap => {
+        const data = snap.data();
+        openPanel.appendChild(makeOpenRow(data.name || 'Untitled',
+          () => { subscribeToProject(snap.id); closeOpenPanel(); },
+          async () => {
+            if (!confirm(`Delete "${data.name}" for everyone? This cannot be undone.`)) return;
+            await deleteProjectDeep(snap.id);
+            if (currentProjectId === snap.id) {
+              teardownProjectListeners(); items.clear(); renderTable(); refresh();
             }
-          ));
-        }
-      } else if (lsNames.length) {
-        // FS not available — show localStorage saves
-        for (const name of lsNames) {
-          openPanel.appendChild(makeOpenRow(name,
-            () => {
-              try { restoreFromJSON(JSON.parse(localStorage.getItem(NAMED_PFX+name))); renderTable(); refresh(); }
-              catch (_) {}
-              closeOpenPanel();
-            },
-            () => {
-              if (confirm(`Delete saved project "${name}"?`)) {
-                localStorage.removeItem(NAMED_PFX+name); refreshOpenPanel();
-              }
-            }
-          ));
-        }
-      } else {
-        openPanel.innerHTML = '<div class="open-proj-empty">No saved projects</div>';
-      }
+            refreshOpenPanel();
+          }
+        ));
+      });
     }
 
     async function showOpenPanel() {
@@ -1153,38 +1276,43 @@
       a.click(); URL.revokeObjectURL(a.href);
     });
 
-    // ── Import (file picker) ─────────────────────────────────────────────────
+    // ── Import (creates a new shared project from a JSON file) ────────────────
     const importInput = document.getElementById('import-input');
     document.getElementById('import-btn').addEventListener('click', () => importInput.click());
     importInput.addEventListener('change', e => {
       const file = e.target.files[0]; if (!file) return;
       const reader = new FileReader();
-      reader.onload = ev => {
-        try { restoreFromJSON(JSON.parse(ev.target.result)); renderTable(); refresh(); }
-        catch (_) { alert('Could not read file — make sure it is a valid Critical Path JSON export.'); }
+      reader.onload = async ev => {
+        try {
+          const data = JSON.parse(ev.target.result);
+          const importedItems = (data.items ?? []).map(it => ({
+            id: it.id, name: it.name??'', duration: it.duration??'', stddev: it.stddev??'',
+            comments: it.comments??'', predecessors: it.predecessors??[], complete: it.complete??false
+          }));
+          await createNewProject(data.projectName || 'Imported', importedItems, {
+            objectiveId: data.objectiveId ?? null, objectiveDate: data.objectiveDate ?? '',
+            order: importedItems.map(it => it.id)
+          });
+        } catch (_) { alert('Could not read file — make sure it is a valid Critical Path JSON export.'); }
       };
       reader.readAsText(file);
       e.target.value = '';
     });
 
-    // ── Startup ──────────────────────────────────────────────────────────────
-    // Restore last session, then silently try to restore the FS directory handle
-    // so the folder label appears without forcing a permission prompt.
-    (async () => {
-      try {
-        const raw = localStorage.getItem(AUTO_KEY);
-        if (raw) { restoreFromJSON(JSON.parse(raw)); renderTable(); refresh(); }
-      } catch (_) {}
-      if (FS_OK) {
-        try {
-          const h = await idbGet('dirHandle');
-          if (h) {
-            const p = await h.queryPermission({ mode: 'readwrite' });
-            if (p === 'granted') { dirHandle = h; setDirLabel(h.name); }
-          }
-        } catch (_) {}
-      }
-    })();
+    // ── Startup (called once signed in) ───────────────────────────────────────
+    function initProjects() {
+      (async () => {
+        let last = null;
+        try { last = localStorage.getItem(LAST_PROJECT_KEY); } catch (_) {}
+        if (last) {
+          const snap = await getDoc(projectDocRef(last));
+          if (snap.exists()) { subscribeToProject(last); return; }
+        }
+        const snaps = await getDocs(query(projectsCol(), orderBy('updatedAt','desc')));
+        if (!snaps.empty) subscribeToProject(snaps.docs[0].id);
+        else await createNewProject('Untitled');
+      })();
+    }
 
     // ── Clock ─────────────────────────────────────────────────────────────────
     const clockEl=document.getElementById('clock');
