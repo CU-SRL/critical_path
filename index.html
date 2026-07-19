@@ -11,12 +11,11 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:     #000000;
+      --bg:     #000;
       --border: #1e1e1e;
-      --text:   #ffffff;
+      --text:   #fff;
       --muted:  #4a4a4a;
-      --dim:    #252525;
-      --sub:    rgba(255,255,255,0.75);
+      --dim:    #242424;
     }
 
     html, body {
@@ -56,11 +55,38 @@
       color: var(--muted);
     }
 
-    /* ── Content ── */
+    /* ── Main split ── */
     main {
       flex: 1;
+      display: flex;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    /* ── Left: table panel ── */
+    .left-panel {
+      flex: 0 0 50%;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .panel-label {
+      flex-shrink: 0;
+      padding: 1.5rem 2.5rem 0.6rem;
+      font-size: 0.56rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .table-scroll {
+      flex: 1;
       overflow-y: auto;
-      padding: 2rem 2.5rem 2.5rem;
+      padding: 0 2.5rem 2rem;
     }
 
     /* ── Table ── */
@@ -69,51 +95,31 @@
       border-collapse: collapse;
     }
 
-    .tbl col.col-toggle { width: 1.75rem; }
-    .tbl col.col-num    { width: 160px; }
-    .tbl col.col-del    { width: 2rem; }
+    .tbl col.col-num  { width: 96px; }
+    .tbl col.col-pred { width: 180px; }
+    .tbl col.col-del  { width: 1.75rem; }
 
     .tbl thead th {
-      padding: 0 0 0.65rem 0;
-      font-size: 0.58rem;
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      padding: 1.25rem 0 0.6rem;
+      font-size: 0.56rem;
       font-weight: 400;
       letter-spacing: 0.22em;
       text-transform: uppercase;
       color: var(--muted);
       text-align: left;
       border-bottom: 1px solid var(--border);
+      z-index: 1;
     }
 
-    /* Horizontal padding for all non-first cells */
-    .tbl th + th,
-    .tbl td + td { padding-left: 1.5rem; }
+    .tbl th + th, .tbl td + td { padding-left: 1.25rem; }
 
     .tbl tbody tr { border-bottom: 1px solid var(--border); }
     .tbl tbody tr:hover .del-btn { opacity: 1; }
     .tbl td { padding: 0; vertical-align: middle; }
 
-    /* ── Toggle button ── */
-    .toggle-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--muted);
-      font-size: 0.75rem;
-      padding: 0;
-      line-height: 1;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 1.25rem;
-      height: 1.25rem;
-      transition: color 0.15s, transform 0.2s ease;
-      transform: rotate(0deg);
-      transform-origin: center;
-    }
-    .toggle-btn:hover { color: var(--text); }
-    .toggle-btn.open  { transform: rotate(90deg); color: var(--text); }
-
-    /* ── Cell inputs ── */
     .cell-input {
       width: 100%;
       background: transparent;
@@ -122,9 +128,9 @@
       color: var(--text);
       font-family: 'Inter', sans-serif;
       font-weight: 300;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       letter-spacing: 0.03em;
-      padding: 0.8rem 0;
+      padding: 0.72rem 0;
       caret-color: var(--text);
     }
     .cell-input::placeholder { color: var(--dim); }
@@ -132,38 +138,53 @@
     .cell-input[type="number"]::-webkit-outer-spin-button,
     .cell-input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
 
-    /* ── Sub-row styling ── */
-    .sub-row .cell-input {
-      font-size: 0.8rem;
-      color: var(--sub);
-      padding: 0.65rem 0;
+    /* ── Predecessor chips ── */
+    .pred-cell {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      padding: 0.4rem 0 0.4rem 1.25rem;
+      min-height: 40px;
     }
-    .sub-row .cell-input::placeholder { color: var(--dim); }
-    .sub-row .name-cell { padding-left: 2.75rem; }
 
-    /* ── Add sub-item row ── */
-    .add-sub-row { border-bottom: none; }
-    .add-sub-row td { padding: 0.35rem 0 0.5rem; }
-    .add-sub-row .name-cell { padding-left: 2.75rem; }
-
-    .add-sub-btn {
+    .pred-chip {
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.2rem;
+      padding: 0.15rem 0.3rem 0.15rem 0.45rem;
+      border: 1px solid #2a2a2a;
+      font-size: 0.6rem;
+      letter-spacing: 0.06em;
+      color: #999;
+      white-space: nowrap;
+      line-height: 1.4;
+    }
+
+    .chip-remove {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #4a4a4a;
+      font-size: 0.75rem;
+      padding: 0 0.1rem;
+      line-height: 1;
+      transition: color 0.12s;
+    }
+    .chip-remove:hover { color: var(--text); }
+
+    .add-pred-btn {
       background: none;
       border: none;
       cursor: pointer;
       color: var(--muted);
-      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
       font-weight: 300;
-      font-size: 0.58rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      padding: 0;
-      transition: color 0.15s;
+      padding: 0 0.1rem;
+      line-height: 1;
+      transition: color 0.12s;
     }
-    .add-sub-btn:hover { color: var(--text); }
-    .add-sub-btn .plus { font-size: 0.9rem; line-height: 1; }
+    .add-pred-btn:hover { color: var(--text); }
 
     /* ── Delete button ── */
     .del-btn {
@@ -173,10 +194,9 @@
       color: var(--muted);
       font-size: 1rem;
       font-weight: 300;
-      line-height: 1;
-      padding: 0 0.2rem;
+      padding: 0;
       opacity: 0;
-      transition: color 0.1s, opacity 0.15s;
+      transition: color 0.12s, opacity 0.15s;
     }
     .del-btn:hover { color: var(--text); }
 
@@ -184,29 +204,109 @@
     .add-btn {
       display: inline-flex;
       align-items: center;
-      gap: 0.55rem;
-      margin-top: 1.25rem;
+      gap: 0.5rem;
+      margin: 1.1rem 2.5rem 0;
       background: none;
       border: none;
       cursor: pointer;
       color: var(--muted);
       font-family: 'Inter', sans-serif;
       font-weight: 300;
-      font-size: 0.6rem;
+      font-size: 0.58rem;
       letter-spacing: 0.22em;
       text-transform: uppercase;
-      padding: 0;
+      padding: 0 0 2rem;
       transition: color 0.15s;
     }
     .add-btn:hover { color: var(--text); }
-    .add-btn .plus { font-size: 1.1rem; font-weight: 300; line-height: 1; }
+    .add-btn .plus { font-size: 1.05rem; line-height: 1; }
 
-    /* ── Row entrance ── */
     @keyframes rowIn {
       from { opacity: 0; }
       to   { opacity: 1; }
     }
-    .tbl tbody tr { animation: rowIn 0.15s ease; }
+    .tbl tbody tr { animation: rowIn 0.12s ease; }
+
+    /* ── Right: graph panel ── */
+    .right-panel {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .graph-viewport {
+      flex: 1;
+      overflow: auto;
+      position: relative;
+      padding: 2rem;
+    }
+
+    .graph-empty {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 0.58rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    #graph-svg { display: block; flex-shrink: 0; }
+
+    /* ── Predecessor picker ── */
+    #picker-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 99;
+    }
+
+    #picker {
+      position: fixed;
+      z-index: 100;
+      background: #060606;
+      border: 1px solid #2a2a2a;
+      min-width: 190px;
+      max-height: 230px;
+      overflow-y: auto;
+      padding: 0.2rem 0;
+    }
+
+    .picker-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 0.8rem;
+      font-size: 0.73rem;
+      font-weight: 300;
+      color: #777;
+      cursor: pointer;
+      letter-spacing: 0.03em;
+      user-select: none;
+    }
+    .picker-row:hover { color: var(--text); background: #111; }
+    .picker-row.selected { color: var(--text); }
+    .picker-row.cyclic { color: #333; cursor: default; }
+    .picker-row.cyclic:hover { color: #333; background: transparent; }
+
+    .picker-check { width: 0.8rem; font-size: 0.6rem; flex-shrink: 0; }
+
+    .picker-empty {
+      padding: 0.5rem 0.8rem;
+      font-size: 0.68rem;
+      color: #333;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── SVG graph ── */
+    .g-node-rect  { fill: #000; stroke: #2e2e2e; stroke-width: 1; }
+    .g-node-name  { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 11px; fill: #ddd; }
+    .g-node-meta  { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 10px; fill: #484848; }
+    .g-edge       { fill: none; stroke: #282828; stroke-width: 1.5; }
 
     /* ── Footer ── */
     footer {
@@ -217,18 +317,12 @@
       padding: 0 2.5rem;
       height: 34px;
       border-top: 1px solid var(--border);
-      font-size: 0.58rem;
+      font-size: 0.56rem;
       letter-spacing: 0.15em;
       text-transform: uppercase;
       color: var(--muted);
     }
-
     .footer-left { display: flex; gap: 2rem; }
-
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.15; }
-    }
   </style>
 </head>
 <body>
@@ -239,29 +333,44 @@
   </header>
 
   <main>
-    <table class="tbl">
-      <colgroup>
-        <col class="col-toggle" />
-        <col />
-        <col class="col-num" />
-        <col class="col-num" />
-        <col class="col-del" />
-      </colgroup>
-      <thead>
-        <tr>
-          <th></th>
-          <th>Item Name</th>
-          <th>Duration (days)</th>
-          <th>Std Dev (days)</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-    </table>
-    <button class="add-btn" id="add-btn">
-      <span class="plus">+</span>
-      <span>Add Item</span>
-    </button>
+    <!-- Table panel -->
+    <div class="left-panel">
+      <div class="panel-label">Items</div>
+      <div class="table-scroll">
+        <table class="tbl">
+          <colgroup>
+            <col />
+            <col class="col-num" />
+            <col class="col-num" />
+            <col class="col-pred" />
+            <col class="col-del" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Item Name</th>
+              <th>Duration (days)</th>
+              <th>Std Dev (days)</th>
+              <th>Predecessors</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <button class="add-btn" id="add-btn">
+        <span class="plus">+</span>
+        <span>Add Item</span>
+      </button>
+    </div>
+
+    <!-- Graph panel -->
+    <div class="right-panel">
+      <div class="panel-label">Dependency Graph</div>
+      <div class="graph-viewport">
+        <div class="graph-empty" id="graph-empty">Add items to visualize dependencies</div>
+        <svg id="graph-svg"></svg>
+      </div>
+    </div>
   </main>
 
   <footer>
@@ -272,97 +381,298 @@
     <span id="clock"></span>
   </footer>
 
+  <!-- Picker overlay -->
+  <div id="picker-backdrop" hidden></div>
+  <div id="picker" hidden></div>
+
   <script>
-    const tbody = document.getElementById('tbody');
-    let counter = 0;
+    // ── State ──────────────────────────────────────────────────────────────────
+    const items = new Map(); // id → { id, name, duration, stddev, predecessors: Set<id> }
+    let nextId = 1;
+    let activePicker = null; // itemId whose picker is open
 
-    function addRow() {
-      const id = ++counter;
-
-      const tr = document.createElement('tr');
-      tr.className = 'parent-row';
-      tr.dataset.rowId = id;
-      tr.innerHTML = `
-        <td><button class="toggle-btn" title="Expand sub-items">&#x203A;</button></td>
-        <td class="name-cell"><input class="cell-input" type="text" placeholder="Item name" /></td>
-        <td><input class="cell-input" type="number" placeholder="0" min="0" step="0.5" /></td>
-        <td><input class="cell-input" type="number" placeholder="0" min="0" step="0.1" /></td>
-        <td><button class="del-btn" title="Remove">&#xD7;</button></td>
-      `;
-
-      tr.querySelector('.toggle-btn').addEventListener('click', () => toggleChildren(id));
-      tr.querySelector('.del-btn').addEventListener('click', () => {
-        tbody.querySelectorAll(`[data-parent="${id}"], [data-add-sub-for="${id}"]`).forEach(r => r.remove());
-        tr.remove();
-      });
-
-      // Add-sub row for this parent (hidden until expanded)
-      const addSubTr = document.createElement('tr');
-      addSubTr.className = 'add-sub-row';
-      addSubTr.dataset.addSubFor = id;
-      addSubTr.hidden = true;
-      addSubTr.innerHTML = `
-        <td></td>
-        <td class="name-cell" colspan="3">
-          <button class="add-sub-btn">
-            <span class="plus">+</span>
-            <span>Add Sub-item</span>
-          </button>
-        </td>
-        <td></td>
-      `;
-      addSubTr.querySelector('.add-sub-btn').addEventListener('click', () => addSubRow(id));
-
-      tbody.appendChild(tr);
-      tbody.appendChild(addSubTr);
-      tr.querySelector('.cell-input').focus();
+    // ── Utilities ──────────────────────────────────────────────────────────────
+    function esc(s) {
+      return String(s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
-    function addSubRow(parentId) {
-      const id = ++counter;
-
-      const tr = document.createElement('tr');
-      tr.className = 'sub-row';
-      tr.dataset.rowId = id;
-      tr.dataset.parent = parentId;
-      tr.innerHTML = `
-        <td></td>
-        <td class="name-cell"><input class="cell-input" type="text" placeholder="Sub-item name" /></td>
-        <td><input class="cell-input" type="number" placeholder="0" min="0" step="0.5" /></td>
-        <td><input class="cell-input" type="number" placeholder="0" min="0" step="0.1" /></td>
-        <td><button class="del-btn" title="Remove">&#xD7;</button></td>
-      `;
-      tr.querySelector('.del-btn').addEventListener('click', () => tr.remove());
-
-      const anchor = tbody.querySelector(`[data-add-sub-for="${parentId}"]`);
-      tbody.insertBefore(tr, anchor);
-      tr.querySelector('.cell-input').focus();
+    function trunc(s, n) {
+      return s.length > n ? s.slice(0, n - 1) + '…' : s;
     }
 
-    function toggleChildren(parentId) {
-      const parentRow = tbody.querySelector(`[data-row-id="${parentId}"]`);
-      const btn = parentRow.querySelector('.toggle-btn');
-      const opening = !btn.classList.contains('open');
-
-      tbody.querySelectorAll(`[data-parent="${parentId}"], [data-add-sub-for="${parentId}"]`).forEach(r => {
-        r.hidden = !opening;
-      });
-
-      btn.classList.toggle('open', opening);
+    function label(id) {
+      const item = items.get(id);
+      if (!item) return '?';
+      return item.name.trim() || `#${id}`;
     }
 
-    document.getElementById('add-btn').addEventListener('click', addRow);
-
-    // Tab from last visible input → new parent row
-    tbody.addEventListener('keydown', e => {
-      if (e.key !== 'Tab' || e.shiftKey) return;
-      const visible = [...tbody.querySelectorAll('.cell-input')].filter(i => !i.closest('tr').hidden);
-      if (visible.length && e.target === visible[visible.length - 1]) {
-        e.preventDefault();
-        addRow();
+    // ── Cycle detection ────────────────────────────────────────────────────────
+    // Returns true if making `predId` a predecessor of `itemId` would create a cycle.
+    function wouldCycle(itemId, predId) {
+      const visited = new Set();
+      function dfs(id) {
+        if (id === predId) return true;
+        if (visited.has(id)) return false;
+        visited.add(id);
+        for (const [oid, o] of items) {
+          if (o.predecessors.has(id) && dfs(oid)) return true;
+        }
+        return false;
       }
+      return dfs(itemId);
+    }
+
+    // ── Item operations ────────────────────────────────────────────────────────
+    function addItem() {
+      const id = nextId++;
+      items.set(id, { id, name: '', duration: '', stddev: '', predecessors: new Set() });
+      renderTable();
+      renderGraph();
+      document.querySelector(`[data-id="${id}"][data-field="name"]`)?.focus();
+    }
+
+    function removeItem(id) {
+      items.delete(id);
+      for (const item of items.values()) item.predecessors.delete(id);
+      closePicker();
+      renderTable();
+      renderGraph();
+    }
+
+    function updateField(id, field, value) {
+      const item = items.get(id);
+      if (!item) return;
+      item[field] = value;
+      if (field === 'name') {
+        // Refresh chips in items that list this as predecessor (name changed)
+        for (const [oid, o] of items) {
+          if (o.predecessors.has(id)) refreshChips(oid);
+        }
+      }
+      renderGraph();
+    }
+
+    function togglePred(itemId, predId) {
+      const item = items.get(itemId);
+      if (!item) return;
+      if (item.predecessors.has(predId)) {
+        item.predecessors.delete(predId);
+      } else {
+        if (wouldCycle(itemId, predId)) return;
+        item.predecessors.add(predId);
+      }
+      refreshChips(itemId);
+      renderGraph();
+    }
+
+    // ── Table rendering ────────────────────────────────────────────────────────
+    function renderTable() {
+      const tbody = document.getElementById('tbody');
+      tbody.innerHTML = '';
+      for (const [id, item] of items) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><input class="cell-input" type="text"   value="${esc(item.name)}"     placeholder="Item name" data-field="name"     data-id="${id}" /></td>
+          <td><input class="cell-input" type="number" value="${esc(item.duration)}" placeholder="0" min="0" step="0.5" data-field="duration" data-id="${id}" /></td>
+          <td><input class="cell-input" type="number" value="${esc(item.stddev)}"   placeholder="0" min="0" step="0.1" data-field="stddev"   data-id="${id}" /></td>
+          <td><div class="pred-cell" data-pred-for="${id}">${chips(id)}</div></td>
+          <td><button class="del-btn" data-del="${id}">&#xD7;</button></td>
+        `;
+        tbody.appendChild(tr);
+      }
+    }
+
+    function chips(id) {
+      const item = items.get(id);
+      if (!item) return '';
+      let h = '';
+      for (const pid of item.predecessors) {
+        if (items.has(pid)) {
+          h += `<span class="pred-chip">${esc(trunc(label(pid), 14))}<button class="chip-remove" data-remove-pred="${id}" data-pred-id="${pid}">&#xD7;</button></span>`;
+        }
+      }
+      return h + `<button class="add-pred-btn" data-add-pred="${id}">+</button>`;
+    }
+
+    function refreshChips(id) {
+      const el = document.querySelector(`[data-pred-for="${id}"]`);
+      if (el) el.innerHTML = chips(id);
+    }
+
+    // ── Event delegation ───────────────────────────────────────────────────────
+    document.getElementById('tbody').addEventListener('input', e => {
+      const el = e.target;
+      if (el.dataset.field) updateField(+el.dataset.id, el.dataset.field, el.value);
     });
 
+    document.getElementById('tbody').addEventListener('click', e => {
+      const del     = e.target.closest('[data-del]');
+      const addPred = e.target.closest('[data-add-pred]');
+      const rmPred  = e.target.closest('[data-remove-pred]');
+      if (del)     { removeItem(+del.dataset.del); return; }
+      if (addPred) { showPicker(+addPred.dataset.addPred, addPred); return; }
+      if (rmPred)  { togglePred(+rmPred.dataset.removePred, +rmPred.dataset.predId); return; }
+    });
+
+    document.getElementById('add-btn').addEventListener('click', addItem);
+
+    // ── Predecessor picker ─────────────────────────────────────────────────────
+    const picker         = document.getElementById('picker');
+    const pickerBackdrop = document.getElementById('picker-backdrop');
+
+    function showPicker(itemId, anchor) {
+      activePicker = itemId;
+      const item = items.get(itemId);
+      picker.innerHTML = '';
+
+      const others = [...items.entries()].filter(([id]) => id !== itemId);
+      if (others.length === 0) {
+        picker.innerHTML = '<div class="picker-empty">No other items yet</div>';
+      } else {
+        for (const [id] of others) {
+          const sel    = item.predecessors.has(id);
+          const cyclic = !sel && wouldCycle(itemId, id);
+          const row    = document.createElement('div');
+          row.className = `picker-row${sel ? ' selected' : ''}${cyclic ? ' cyclic' : ''}`;
+          row.dataset.pickId = id;
+          row.innerHTML = `<span class="picker-check">${sel ? '✓' : ''}</span>${esc(trunc(label(id), 24))}${cyclic ? ' <span style="color:#333;font-size:0.6rem">⊗</span>' : ''}`;
+          picker.appendChild(row);
+        }
+      }
+
+      const r = anchor.getBoundingClientRect();
+      picker.style.left = `${Math.min(r.left, window.innerWidth - 210)}px`;
+      picker.style.top  = `${r.bottom + 4}px`;
+      picker.hidden         = false;
+      pickerBackdrop.hidden = false;
+    }
+
+    function closePicker() {
+      picker.hidden         = true;
+      pickerBackdrop.hidden = true;
+      activePicker = null;
+    }
+
+    pickerBackdrop.addEventListener('click', closePicker);
+
+    picker.addEventListener('click', e => {
+      const row = e.target.closest('[data-pick-id]');
+      if (!row || activePicker === null || row.classList.contains('cyclic')) return;
+      togglePred(activePicker, +row.dataset.pickId);
+      // Refresh check marks in-place
+      const item = items.get(activePicker);
+      picker.querySelectorAll('.picker-row[data-pick-id]').forEach(r => {
+        const id  = +r.dataset.pickId;
+        const sel = item?.predecessors.has(id);
+        r.classList.toggle('selected', !!sel);
+        r.querySelector('.picker-check').textContent = sel ? '✓' : '';
+      });
+    });
+
+    // ── Graph layout & rendering ───────────────────────────────────────────────
+    const NW = 148, NH = 50, CG = 96, RG = 22, PAD = 36;
+
+    function computeLayout() {
+      // Assign column = max(predecessor columns) + 1
+      const col = new Map();
+      for (const [id] of items) col.set(id, 0);
+      for (let i = 0; i < items.size; i++) {
+        for (const [id, item] of items) {
+          for (const pid of item.predecessors) {
+            if (items.has(pid)) {
+              const d = (col.get(pid) ?? 0) + 1;
+              if (d > (col.get(id) ?? 0)) col.set(id, d);
+            }
+          }
+        }
+      }
+      // Group by column, assign row
+      const groups = new Map();
+      for (const [id, c] of col) {
+        if (!groups.has(c)) groups.set(c, []);
+        groups.get(c).push(id);
+      }
+      const layout = new Map();
+      for (const [c, ids] of groups) ids.forEach((id, r) => layout.set(id, { c, r }));
+      return { layout, groups };
+    }
+
+    function renderGraph() {
+      const svg   = document.getElementById('graph-svg');
+      const empty = document.getElementById('graph-empty');
+
+      if (items.size === 0) {
+        svg.innerHTML = '';
+        svg.removeAttribute('width');
+        svg.removeAttribute('height');
+        empty.style.display = '';
+        return;
+      }
+      empty.style.display = 'none';
+
+      const { layout, groups } = computeLayout();
+      const numCols  = Math.max(...[...groups.keys()]) + 1;
+      const colSizes = new Map([...groups.entries()].map(([c, ids]) => [c, ids.length]));
+      const maxRows  = Math.max(...colSizes.values());
+      const contentH = maxRows * NH + Math.max(0, maxRows - 1) * RG;
+      const totalW   = PAD + numCols * NW + Math.max(0, numCols - 1) * CG + PAD;
+      const totalH   = PAD + contentH + PAD;
+
+      // Node positions (vertically center each column)
+      const pos = new Map();
+      for (const [id, { c, r }] of layout) {
+        const cnt  = colSizes.get(c);
+        const colH = cnt * NH + Math.max(0, cnt - 1) * RG;
+        const yOff = PAD + (contentH - colH) / 2;
+        pos.set(id, {
+          x: PAD + c * (NW + CG),
+          y: yOff + r * (NH + RG),
+        });
+      }
+
+      // Build SVG
+      let s = `<defs>
+        <marker id="arr" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+          <path d="M 0 1.2 L 6 3.5 L 0 5.8 z" fill="#303030"/>
+        </marker>
+      </defs>`;
+
+      // Edges
+      for (const [id, item] of items) {
+        const to = pos.get(id);
+        if (!to) continue;
+        for (const pid of item.predecessors) {
+          const fr = pos.get(pid);
+          if (!fr) continue;
+          const x1 = fr.x + NW,    y1 = fr.y + NH / 2;
+          const x2 = to.x,         y2 = to.y + NH / 2;
+          const mx = (x1 + x2) / 2;
+          s += `<path class="g-edge" d="M${x1} ${y1} C${mx} ${y1},${mx} ${y2},${x2} ${y2}" marker-end="url(#arr)"/>`;
+        }
+      }
+
+      // Nodes
+      for (const [id, item] of items) {
+        const { x, y } = pos.get(id);
+        const name = esc(trunc(item.name.trim() || `#${id}`, 20));
+        const meta = item.duration ? esc(`${item.duration} days`) : '';
+        const ny   = meta ? y + 18 : y + 26;
+        s += `<g>
+          <rect class="g-node-rect" x="${x}" y="${y}" width="${NW}" height="${NH}" rx="1"/>
+          <text class="g-node-name" x="${x + NW / 2}" y="${ny}" text-anchor="middle">${name}</text>
+          ${meta ? `<text class="g-node-meta" x="${x + NW / 2}" y="${y + 34}" text-anchor="middle">${meta}</text>` : ''}
+        </g>`;
+      }
+
+      svg.setAttribute('width',   totalW);
+      svg.setAttribute('height',  totalH);
+      svg.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
+      svg.innerHTML = s;
+    }
+
+    // ── Clock ──────────────────────────────────────────────────────────────────
     const clock = document.getElementById('clock');
     (function tick() {
       clock.textContent = new Date().toLocaleTimeString('en-US', { hour12: false });
