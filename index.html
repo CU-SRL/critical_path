@@ -10,6 +10,14 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* Dark scrollbars */
+    ::-webkit-scrollbar { width:7px; height:7px; }
+    ::-webkit-scrollbar-track { background:#000; }
+    ::-webkit-scrollbar-thumb { background:#222; }
+    ::-webkit-scrollbar-thumb:hover { background:#303030; }
+    ::-webkit-scrollbar-corner { background:#000; }
+    html, .items-scroll, .graph-viewport, .cal-body, #picker, #open-panel { scrollbar-color:#222 #000; scrollbar-width:thin; }
+
     :root {
       --bg:    #000;
       --brd:   #1e1e1e;
@@ -44,9 +52,10 @@
     .items-scroll { flex:1; overflow-y:auto; padding:0 2.5rem 1rem; }
 
     .tbl { width:100%; max-width:960px; border-collapse:collapse; }
-    .tbl col.col-num  { width:110px; }
-    .tbl col.col-pred { width:185px; }
-    .tbl col.col-icon { width:1.75rem; }
+    .tbl col.col-num     { width:110px; }
+    .tbl col.col-pred    { width:185px; }
+    .tbl col.col-comment { width:220px; }
+    .tbl col.col-icon    { width:1.75rem; }
 
     .tbl thead th { position:sticky; top:0; background:var(--bg); padding:1.25rem 0 .6rem; font-size:.55rem; font-weight:400; letter-spacing:.22em; text-transform:uppercase; color:var(--muted); text-align:left; border-bottom:1px solid var(--brd); z-index:1; }
     .tbl th+th, .tbl td+td { padding-left:1.25rem; }
@@ -61,13 +70,14 @@
     .cell-input[type="number"] { -moz-appearance:textfield; }
     .cell-input[type="number"]::-webkit-outer-spin-button,
     .cell-input[type="number"]::-webkit-inner-spin-button { -webkit-appearance:none; }
+    textarea.cell-input { resize:none; overflow:hidden; line-height:1.45; padding:.62rem 0; min-height:2.55rem; }
 
     /* Complete row styling */
     .tbl tbody tr.is-complete .cell-input { opacity:.35; }
-    .tbl tbody tr.is-complete td:first-child .cell-input { text-decoration:line-through; }
+    .tbl tbody tr.is-complete td:nth-child(2) .cell-input { text-decoration:line-through; }
 
     /* Predecessor chips */
-    .pred-cell { display:flex; align-items:center; flex-wrap:wrap; gap:.3rem; padding:.4rem 0 .4rem 1.25rem; min-height:40px; }
+    .pred-cell { display:flex; align-items:center; align-content:flex-start; flex-wrap:wrap; gap:.3rem; padding:.4rem 0 .4rem 1.25rem; min-height:40px; }
     .pred-chip { display:inline-flex; align-items:center; gap:.2rem; padding:.15rem .3rem .15rem .45rem; border:1px solid #2a2a2a; font-size:.58rem; letter-spacing:.06em; color:#999; white-space:nowrap; }
     .chip-remove { background:none; border:none; cursor:pointer; color:#444; font-size:.75rem; padding:0 .1rem; line-height:1; transition:color .12s; }
     .chip-remove:hover { color:var(--text); }
@@ -84,7 +94,7 @@
     .chk-btn:hover, .obj-btn:hover, .del-btn:hover { color:var(--text); }
 
     /* Objective row marker */
-    .tbl tbody tr.is-objective td:first-child { border-left:1px solid #2e2e2e; }
+    .tbl tbody tr.is-objective td:nth-child(2) { border-left:1px solid #2e2e2e; }
 
     /* Objective date sub-row */
     .obj-date-row td { padding:0; border-bottom:1px solid var(--brd); }
@@ -122,8 +132,20 @@
     .leg { display:flex; align-items:center; gap:.45rem; }
     .leg-sw { width:14px; height:6px; border-radius:1px; flex-shrink:0; }
 
-    .cal-viewport { flex:1; overflow:auto; position:relative; }
-    #cal-svg { display:block; }
+    .cal-outer { display:none; flex:1; min-height:0; grid-template-columns:220px 1fr; grid-template-rows:52px 1fr; overflow:hidden; }
+    .cal-corner { background:var(--bg); border-right:1px solid var(--brd); border-bottom:1px solid var(--brd); }
+    .cal-col-hdr { overflow:hidden; border-bottom:1px solid var(--brd); }
+    .cal-row-hdr { overflow:hidden; border-right:1px solid var(--brd); }
+    .cal-body { overflow:auto; }
+    .cal-col-hdr svg, .cal-row-hdr svg, .cal-body svg { display:block; }
+    #cal-empty { flex:1; display:flex; align-items:center; justify-content:center; position:static; transform:none; }
+
+    .tbl col.col-drag { width:1.4rem; }
+    .drag-handle-cell { padding:0 !important; vertical-align:middle; }
+    .drag-handle { display:block; cursor:grab; color:#252525; font-size:.65rem; padding:.72rem .35rem; user-select:none; text-align:center; transition:color .12s; }
+    .drag-handle:hover { color:#555; }
+    .tbl tbody tr.dragging { opacity:.3; }
+    .tbl tbody tr.drag-over { background:#0c0c0c; }
 
     .c-weekend      { fill:#060606; }
     .c-past-col     { fill:#040404; }
@@ -210,13 +232,13 @@
       <div class="items-scroll">
         <table class="tbl">
           <colgroup>
-            <col /><col class="col-num"/><col class="col-num"/><col class="col-pred"/>
-            <col class="col-icon"/><col class="col-icon"/><col class="col-icon"/>
+            <col class="col-drag"/><col /><col class="col-num"/><col class="col-num"/>
+            <col class="col-pred"/><col class="col-comment"/><col class="col-icon"/><col class="col-icon"/><col class="col-icon"/>
           </colgroup>
           <thead>
             <tr>
-              <th>Item Name</th><th>Duration (days)</th><th>Std Dev (days)</th>
-              <th>Predecessors</th><th></th><th></th><th></th>
+              <th></th><th>Item Name</th><th>Duration (days)</th><th>Std Dev (days)</th>
+              <th>Predecessors</th><th>Comments</th><th></th><th></th><th></th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
@@ -249,9 +271,12 @@
           <button class="zoom-btn" id="zoom-in">+</button>
         </div>
       </div>
-      <div class="cal-viewport">
-        <div class="placeholder-msg" id="cal-empty">Add items with durations to see the calendar</div>
-        <svg id="cal-svg"></svg>
+      <div class="placeholder-msg" id="cal-empty">Add items with durations to see the calendar</div>
+      <div class="cal-outer" id="cal-outer">
+        <div class="cal-corner"></div>
+        <div class="cal-col-hdr" id="cal-col-hdr"><svg id="cal-hdr-svg"></svg></div>
+        <div class="cal-row-hdr" id="cal-row-hdr"><svg id="cal-names-svg"></svg></div>
+        <div class="cal-body" id="cal-body"><svg id="cal-bars-svg"></svg></div>
       </div>
     </div>
   </main>
@@ -276,6 +301,8 @@
     // ── Utilities ──────────────────────────────────────────────────────────────
     const esc    = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     const trunc  = (s,n) => s.length>n ? s.slice(0,n-1)+'…' : s;
+    function autoResize(el) { el.style.height='auto'; el.style.height=el.scrollHeight+'px'; }
+    function autoResizeAll() { document.querySelectorAll('#tbody textarea.cell-input').forEach(autoResize); }
     const label  = id => { const it=items.get(id); return it?.name.trim()||`#${id}`; };
     const durOf  = id => Math.max(parseFloat(items.get(id)?.duration)||0, 0);
     const effDur = id => items.get(id)?.complete ? 0 : durOf(id);  // 0 for complete items
@@ -419,7 +446,7 @@
     // ── CRUD ──────────────────────────────────────────────────────────────────
     function addItem() {
       const id=nextId++;
-      items.set(id,{id,name:'',duration:'',stddev:'',predecessors:new Set(),complete:false});
+      items.set(id,{id,name:'',duration:'',stddev:'',comments:'',predecessors:new Set(),complete:false});
       renderTable(); refresh();
       document.querySelector(`[data-id="${id}"][data-field="name"]`)?.focus();
     }
@@ -470,15 +497,17 @@
         const isObj=objectiveId===id, isDone=item.complete;
 
         const tr=document.createElement('tr');
-        tr.dataset.rowId=id;
+        tr.dataset.rowId=id; tr.draggable=true;
         if (isObj)  tr.classList.add('is-objective');
         if (isDone) tr.classList.add('is-complete');
 
         tr.innerHTML=`
-          <td><input class="cell-input" type="text"   value="${esc(item.name)}"     placeholder="Item name" data-field="name"     data-id="${id}"/></td>
+          <td class="drag-handle-cell"><span class="drag-handle">⣿</span></td>
+          <td><textarea class="cell-input" placeholder="Item name" data-field="name"     data-id="${id}">${esc(item.name)}</textarea></td>
           <td><input class="cell-input" type="number" value="${esc(item.duration)}" placeholder="0" min="0" step="0.5" data-field="duration" data-id="${id}"/></td>
           <td><input class="cell-input" type="number" value="${esc(item.stddev)}"   placeholder="0" min="0" step="0.1" data-field="stddev"   data-id="${id}"/></td>
           <td><div class="pred-cell" data-pred-for="${id}">${chips(id)}</div></td>
+          <td><textarea class="cell-input" placeholder="Notes…" data-field="comments" data-id="${id}">${esc(item.comments)}</textarea></td>
           <td><button class="chk-btn${isDone?' active':''}" data-complete="${id}" title="${isDone?'Mark incomplete':'Mark complete'}">✓</button></td>
           <td><button class="obj-btn${isObj?' active':''}" data-obj="${id}"      title="${isObj?'Remove objective':'Set as objective'}">◎</button></td>
           <td><button class="del-btn"                       data-del="${id}"      title="Remove">&#xD7;</button></td>`;
@@ -487,12 +516,13 @@
         // Objective date sub-row
         const dr=document.createElement('tr');
         dr.className='obj-date-row'; dr.hidden=!isObj;
-        dr.innerHTML=`<td colspan="7"><div class="obj-date-cell">
+        dr.innerHTML=`<td colspan="9"><div class="obj-date-cell">
           <span class="obj-date-label">Target Date</span>
           <input type="date" class="date-input" data-obj-date="${id}" value="${isObj?objectiveDate:''}"/>
         </div></td>`;
         tbody.appendChild(dr);
       }
+      setTimeout(autoResizeAll, 0);
     }
 
     function chips(id) {
@@ -511,6 +541,7 @@
 
     // ── Events ────────────────────────────────────────────────────────────────
     document.getElementById('tbody').addEventListener('input', e => {
+      if (e.target.tagName==='TEXTAREA') autoResize(e.target);
       if (e.target.dataset.field)    updateField(+e.target.dataset.id, e.target.dataset.field, e.target.value);
       if (e.target.dataset.objDate!==undefined) { objectiveDate=e.target.value; refresh(); }
     });
@@ -642,20 +673,18 @@
     }
 
     // ── Calendar ──────────────────────────────────────────────────────────────
-    const NAME_W=170,ROW_H=40,HDR_H=52,CAL_PAD=24;
+    const NAME_W=220,ROW_H=40,HDR_H=52,CAL_PAD=24;
     let calZoom=1;
     const ZOOM_MIN=0.12, ZOOM_MAX=6, ZOOM_BASE=38;
 
     function renderCalendar() {
-      const svg=document.getElementById('cal-svg'), empty=document.getElementById('cal-empty');
+      const outer=document.getElementById('cal-outer'), empty=document.getElementById('cal-empty');
       const hasDur=[...items.values()].some(it=>parseFloat(it.duration)>0);
-      if (!items.size||!hasDur) { svg.innerHTML=''; svg.removeAttribute('width'); svg.removeAttribute('height'); empty.style.display=''; return; }
-      empty.style.display='none';
+      if (!items.size||!hasDur) { outer.style.display='none'; empty.style.display=''; return; }
+      outer.style.display='grid'; empty.style.display='none';
 
       const { es, ef, ls, lf, critical, targetDays } = computeSchedule();
       const hasObj = targetDays!==null;
-
-      // Bar position: LS in objective mode, ES in forward mode
       const bStart = id => hasObj ? (ls.get(id)??0) : (es.get(id)??0);
 
       const today=new Date(); today.setHours(0,0,0,0);
@@ -670,121 +699,115 @@
         dayEnd=Math.ceil(Math.max(...ef.values(),14))+7;
       }
       const totalDays=dayEnd-dayStart;
-
-      const DAY_W = Math.max(2, ZOOM_BASE * calZoom);
+      const DAY_W=Math.max(2,ZOOM_BASE*calZoom);
 
       function colDate(c) { const d=new Date(today); d.setDate(today.getDate()+dayStart+c); return d; }
-      function dayX(day)  { return NAME_W+(day-dayStart)*DAY_W; }
+      const bodyX=day=>(day-dayStart)*DAY_W;
 
-      const svgW=NAME_W+totalDays*DAY_W+CAL_PAD;
-      const svgH=HDR_H+items.size*ROW_H+CAL_PAD;
-      let s='';
+      const bodyW=totalDays*DAY_W, bodyH=items.size*ROW_H;
+      const todayX=bodyX(0), targetX=hasObj?bodyX(targetDays):null;
 
-      // Past-date shading (single rect, not per-day)
-      if (dayStart<0) s+=`<rect class="c-past-col" x="${NAME_W}" y="${HDR_H}" width="${-dayStart*DAY_W}" height="${items.size*ROW_H}"/>`;
+      // ── Header SVG (dates) ──────────────────────────────────────────────────
+      let hdr='';
+      let lastMon=-1;
+      for (let d=0; d<=totalDays; d++) {
+        const x=d*DAY_W, dt=colDate(d), isPast=(dayStart+d)<0;
+        const isMonday=dt.getDay()===1, isFirstOfMonth=dt.getDate()===1;
+        const mon=dt.getMonth();
+        if (d<totalDays) {
+          if (isFirstOfMonth) hdr+=`<line class="c-grid-vmo" x1="${x}" y1="0" x2="${x}" y2="${HDR_H}"/>`;
+          if (mon!==lastMon) {
+            const ml=DAY_W>=5
+              ? dt.toLocaleDateString('en-US',{month:'short',year:'numeric'}).toUpperCase()
+              : dt.toLocaleDateString('en-US',{month:'short'}).toUpperCase()+' '+dt.getFullYear();
+            hdr+=`<text class="c-month" x="${x+3}" y="13">${ml}</text>`;
+            lastMon=mon;
+          }
+          const cx=x+DAY_W/2;
+          if (DAY_W>=14) {
+            hdr+=`<text class="${isPast?'c-day-past':'c-day'}" x="${cx}" y="31" text-anchor="middle">${dt.getDate()}</text>`;
+            hdr+=`<text class="c-dow" x="${cx}" y="43" text-anchor="middle">${['S','M','T','W','T','F','S'][dt.getDay()]}</text>`;
+          } else if (DAY_W>=7&&isMonday) {
+            hdr+=`<text class="${isPast?'c-day-past':'c-day'}" x="${x+2}" y="28" text-anchor="start" font-size="8">${dt.getDate()}</text>`;
+          }
+        }
+      }
+      if (todayX>=0&&todayX<=bodyW) {
+        hdr+=`<line class="c-today" x1="${todayX}" y1="0" x2="${todayX}" y2="${HDR_H}"/>`;
+        hdr+=`<text class="c-marker" x="${todayX+3}" y="11" fill="#383838">TODAY</text>`;
+      }
+      if (targetX!==null) {
+        hdr+=`<line class="c-target" x1="${targetX}" y1="0" x2="${targetX}" y2="${HDR_H}"/>`;
+        hdr+=`<text class="c-marker" x="${targetX+3}" y="11" fill="rgba(255,255,255,.22)">TARGET</text>`;
+      }
+      const hdrSvg=document.getElementById('cal-hdr-svg');
+      hdrSvg.setAttribute('width',bodyW); hdrSvg.setAttribute('height',HDR_H);
+      hdrSvg.setAttribute('viewBox',`0 0 ${bodyW} ${HDR_H}`);
+      hdrSvg.innerHTML=hdr;
 
-      // Weekend shading — skip when very zoomed out (invisible anyway)
+      // ── Names SVG (task names) ───────────────────────────────────────────
+      let names='';
+      let row=0;
+      for (const [id,item] of items) {
+        const d=durOf(id), y=row*ROW_H;
+        names+=`<line class="c-grid-h" x1="0" y1="${y}" x2="${NAME_W}" y2="${y}"/>`;
+        names+=`<text class="${d>0?'c-name':'c-name-dim'}" x="${NAME_W-10}" y="${y+ROW_H/2+4}" text-anchor="end">${esc(trunc(label(id),26))}${item.complete?' ✓':''}</text>`;
+        row++;
+      }
+      names+=`<line class="c-grid-h" x1="0" y1="${bodyH}" x2="${NAME_W}" y2="${bodyH}"/>`;
+      const namesSvg=document.getElementById('cal-names-svg');
+      namesSvg.setAttribute('width',NAME_W); namesSvg.setAttribute('height',bodyH);
+      namesSvg.setAttribute('viewBox',`0 0 ${NAME_W} ${bodyH}`);
+      namesSvg.innerHTML=names;
+
+      // ── Bars SVG (grid + bars) ───────────────────────────────────────────
+      let bars='';
+      if (dayStart<0) bars+=`<rect class="c-past-col" x="0" y="0" width="${-dayStart*DAY_W}" height="${bodyH}"/>`;
       if (DAY_W>=5) {
         for (let d=0; d<totalDays; d++) {
           const dt=colDate(d);
           if (dt.getDay()===0||dt.getDay()===6)
-            s+=`<rect class="c-weekend" x="${NAME_W+d*DAY_W}" y="${HDR_H}" width="${DAY_W}" height="${items.size*ROW_H}"/>`;
+            bars+=`<rect class="c-weekend" x="${d*DAY_W}" y="0" width="${DAY_W}" height="${bodyH}"/>`;
         }
       }
-
-      // Horizontal row lines
       for (let r=0; r<=items.size; r++)
-        s+=`<line class="c-grid-h" x1="${NAME_W}" y1="${HDR_H+r*ROW_H}" x2="${svgW-CAL_PAD}" y2="${HDR_H+r*ROW_H}"/>`;
-
-      // Vertical grid lines + header labels
-      // Grid density and label visibility scale with DAY_W:
-      //   DAY_W >= 14 : daily lines + all day numbers + DOW
-      //   DAY_W >= 7  : weekly lines + Monday numbers only
-      //   DAY_W < 7   : monthly lines only, no day numbers
-      let lastMon=-1;
-      for (let d=0; d<=totalDays; d++) {
-        const x=NAME_W+d*DAY_W, dt=colDate(d), isPast=d<-dayStart;
-        const isMonday=dt.getDay()===1, isFirstOfMonth=dt.getDate()===1;
-        const mon=dt.getMonth();
-
-        if (d<totalDays) {
-          // Vertical grid line
-          if (isFirstOfMonth)
-            s+=`<line class="c-grid-vmo" x1="${x}" y1="0" x2="${x}" y2="${svgH-CAL_PAD}"/>`;
-          else if (DAY_W>=7 && isMonday)
-            s+=`<line class="c-grid-vwk" x1="${x}" y1="${HDR_H}" x2="${x}" y2="${svgH-CAL_PAD}"/>`;
-          else if (DAY_W>=14)
-            s+=`<line class="c-grid-v" x1="${x}" y1="${HDR_H}" x2="${x}" y2="${svgH-CAL_PAD}"/>`;
-
-          // Month label — always render at month boundary
-          if (mon!==lastMon) {
-            const label = DAY_W>=5
-              ? dt.toLocaleDateString('en-US',{month:'short',year:'numeric'}).toUpperCase()
-              : dt.toLocaleDateString('en-US',{month:'short'}).toUpperCase()+' '+dt.getFullYear();
-            s+=`<text class="c-month" x="${x+3}" y="13">${label}</text>`;
-            lastMon=mon;
-          }
-
-          // Day number + DOW
-          const cx=x+DAY_W/2;
-          if (DAY_W>=14) {
-            // All days
-            s+=`<text class="${isPast?'c-day-past':'c-day'}" x="${cx}" y="31" text-anchor="middle">${dt.getDate()}</text>`;
-            s+=`<text class="c-dow" x="${cx}" y="43" text-anchor="middle">${['S','M','T','W','T','F','S'][dt.getDay()]}</text>`;
-          } else if (DAY_W>=7 && isMonday) {
-            // Mondays only
-            s+=`<text class="${isPast?'c-day-past':'c-day'}" x="${x+2}" y="28" text-anchor="start" font-size="8">${dt.getDate()}</text>`;
-          }
-        }
+        bars+=`<line class="c-grid-h" x1="0" y1="${r*ROW_H}" x2="${bodyW}" y2="${r*ROW_H}"/>`;
+      for (let d=0; d<totalDays; d++) {
+        const x=d*DAY_W, dt=colDate(d);
+        if (dt.getDate()===1)
+          bars+=`<line class="c-grid-vmo" x1="${x}" y1="0" x2="${x}" y2="${bodyH}"/>`;
+        else if (DAY_W>=7&&dt.getDay()===1)
+          bars+=`<line class="c-grid-vwk" x1="${x}" y1="0" x2="${x}" y2="${bodyH}"/>`;
+        else if (DAY_W>=14)
+          bars+=`<line class="c-grid-v" x1="${x}" y1="0" x2="${x}" y2="${bodyH}"/>`;
       }
+      if (todayX>=0&&todayX<=bodyW) bars+=`<line class="c-today" x1="${todayX}" y1="0" x2="${todayX}" y2="${bodyH}"/>`;
+      if (targetX!==null) bars+=`<line class="c-target" x1="${targetX}" y1="0" x2="${targetX}" y2="${bodyH}"/>`;
 
-      // Today line
-      const todayX=dayX(0);
-      if (todayX>=NAME_W && todayX<=svgW-CAL_PAD) {
-        s+=`<line class="c-today" x1="${todayX}" y1="8" x2="${todayX}" y2="${svgH-CAL_PAD}"/>`;
-        s+=`<text class="c-marker" x="${todayX+3}" y="11" fill="#383838">TODAY</text>`;
-      }
-
-      // Target line
-      if (hasObj) {
-        const tx=dayX(targetDays);
-        s+=`<line class="c-target" x1="${tx}" y1="8" x2="${tx}" y2="${svgH-CAL_PAD}"/>`;
-        s+=`<text class="c-marker" x="${tx+3}" y="11" fill="rgba(255,255,255,.22)">TARGET</text>`;
-      }
-
-      // Item bars
-      let row=0;
+      row=0;
       for (const [id,item] of items) {
-        const d=durOf(id), y=HDR_H+row*ROW_H;
+        const d=durOf(id), y=row*ROW_H;
         const isDone=item.complete, isCrit=critical.has(id);
-
-        s+=`<text class="${d>0?'c-name':'c-name-dim'}" x="${NAME_W-10}" y="${y+ROW_H/2+4}" text-anchor="end">${esc(trunc(label(id),20))}${isDone?' ✓':''}</text>`;
-
         if (d>0) {
           const bs=bStart(id), isPastBar=bs<0;
-
-          // Float indicator (forward mode only, non-critical)
-          if (!hasObj && !isCrit && !isDone) {
+          if (!hasObj&&!isCrit&&!isDone) {
             const fDays=(lf.get(id)??0)-(ef.get(id)??0);
-            if (fDays>0.01) s+=`<rect class="c-float" x="${dayX(ef.get(id)??0)}" y="${y+ROW_H*.28}" width="${fDays*DAY_W}" height="${ROW_H*.44}" rx="1"/>`;
+            if (fDays>0.01) bars+=`<rect class="c-float" x="${bodyX(ef.get(id)??0)}" y="${y+ROW_H*.28}" width="${fDays*DAY_W}" height="${ROW_H*.44}" rx="1"/>`;
           }
-
-          // Choose bar color
           let bc;
-          if (isDone)            bc='c-bar-done';
-          else if (isPastBar&&isCrit)  bc='c-bar-over-crit';
-          else if (isPastBar)          bc='c-bar-over-norm';
-          else if (isCrit)             bc='c-bar-crit';
-          else                         bc='c-bar-norm';
-
-          s+=`<rect class="${bc}" x="${dayX(bs)}" y="${y+ROW_H*.28}" width="${Math.max(d*DAY_W,3)}" height="${ROW_H*.44}" rx="1"/>`;
+          if (isDone)                   bc='c-bar-done';
+          else if (isPastBar&&isCrit)   bc='c-bar-over-crit';
+          else if (isPastBar)           bc='c-bar-over-norm';
+          else if (isCrit)              bc='c-bar-crit';
+          else                          bc='c-bar-norm';
+          bars+=`<rect class="${bc}" x="${bodyX(bs)}" y="${y+ROW_H*.28}" width="${Math.max(d*DAY_W,3)}" height="${ROW_H*.44}" rx="1"/>`;
         }
         row++;
       }
-
-      svg.setAttribute('width',svgW); svg.setAttribute('height',svgH);
-      svg.setAttribute('viewBox',`0 0 ${svgW} ${svgH}`);
-      svg.innerHTML=s;
+      const barsSvg=document.getElementById('cal-bars-svg');
+      barsSvg.setAttribute('width',bodyW); barsSvg.setAttribute('height',bodyH);
+      barsSvg.setAttribute('viewBox',`0 0 ${bodyW} ${bodyH}`);
+      barsSvg.innerHTML=bars;
     }
 
     function refresh() { saveToStorage(); renderGraph(); renderCalendar(); }
@@ -796,6 +819,7 @@
         document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
         btn.classList.add('active');
         document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+        if (btn.dataset.tab==='items') requestAnimationFrame(autoResizeAll);
       });
     });
 
@@ -809,12 +833,72 @@
     document.getElementById('zoom-in') .addEventListener('click', () => applyZoom(1.35));
     document.getElementById('zoom-out').addEventListener('click', () => applyZoom(1/1.35));
 
-    // Ctrl+scroll on the calendar viewport
-    document.querySelector('.cal-viewport').addEventListener('wheel', e => {
+    // Ctrl+scroll on the calendar body
+    document.getElementById('cal-body').addEventListener('wheel', e => {
       if (!e.ctrlKey && !e.metaKey) return;
       e.preventDefault();
       applyZoom(e.deltaY < 0 ? 1.12 : 1/1.12);
     }, { passive: false });
+
+    // Sync calendar pane scrolling (body drives header and names)
+    document.getElementById('cal-body').addEventListener('scroll', function() {
+      document.getElementById('cal-col-hdr').scrollLeft = this.scrollLeft;
+      document.getElementById('cal-row-hdr').scrollTop  = this.scrollTop;
+    });
+
+    // ── Drag-to-reorder items ─────────────────────────────────────────────
+    function reorderItems(fromId, toId) {
+      const keys=[...items.keys()];
+      const fi=keys.indexOf(fromId), ti=keys.indexOf(toId);
+      if (fi===-1||ti===-1||fi===ti) return;
+      keys.splice(fi,1); keys.splice(ti,0,fromId);
+      const next=new Map(keys.map(k=>[k,items.get(k)]));
+      items.clear(); for (const [k,v] of next) items.set(k,v);
+    }
+
+    let dragSrcId=null, dragFromHandle=false;
+    const tbody=document.getElementById('tbody');
+
+    tbody.addEventListener('mousedown', e => { dragFromHandle=!!e.target.closest('.drag-handle'); });
+
+    tbody.addEventListener('dragstart', e => {
+      if (!dragFromHandle) { e.preventDefault(); return; }
+      const tr=e.target.closest('tr[data-row-id]');
+      if (!tr) { e.preventDefault(); return; }
+      dragSrcId=+tr.dataset.rowId;
+      e.dataTransfer.effectAllowed='move';
+      setTimeout(()=>tr.classList.add('dragging'),0);
+    });
+
+    tbody.addEventListener('dragend', e => {
+      const tr=e.target.closest('tr[data-row-id]');
+      if (tr) tr.classList.remove('dragging');
+      tbody.querySelectorAll('tr.drag-over').forEach(r=>r.classList.remove('drag-over'));
+      dragSrcId=null; dragFromHandle=false;
+    });
+
+    tbody.addEventListener('dragover', e => {
+      const tr=e.target.closest('tr[data-row-id]');
+      if (!tr||dragSrcId===null) return;
+      e.preventDefault();
+      tbody.querySelectorAll('tr.drag-over').forEach(r=>r.classList.remove('drag-over'));
+      if (+tr.dataset.rowId!==dragSrcId) tr.classList.add('drag-over');
+    });
+
+    tbody.addEventListener('dragleave', e => {
+      const tr=e.target.closest('tr[data-row-id]');
+      if (tr) tr.classList.remove('drag-over');
+    });
+
+    tbody.addEventListener('drop', e => {
+      e.preventDefault();
+      const tr=e.target.closest('tr[data-row-id]');
+      if (!tr||dragSrcId===null) return;
+      const toId=+tr.dataset.rowId;
+      tbody.querySelectorAll('tr.drag-over').forEach(r=>r.classList.remove('drag-over'));
+      if (dragSrcId!==toId) { reorderItems(dragSrcId,toId); renderTable(); refresh(); }
+      dragSrcId=null; dragFromHandle=false;
+    });
 
     // ── Persistence ──────────────────────────────────────────────────────────
     let projectName   = 'Untitled';
@@ -826,7 +910,7 @@
         version: 1, projectName, nextId, objectiveId, objectiveDate,
         items: [...items.values()].map(it => ({
           id: it.id, name: it.name, duration: it.duration, stddev: it.stddev,
-          predecessors: [...it.predecessors], complete: it.complete
+          comments: it.comments, predecessors: [...it.predecessors], complete: it.complete
         }))
       };
     }
@@ -840,8 +924,8 @@
       for (const it of (data.items ?? [])) {
         items.set(it.id, {
           id: it.id, name: it.name ?? '', duration: it.duration ?? '',
-          stddev: it.stddev ?? '', predecessors: new Set(it.predecessors ?? []),
-          complete: it.complete ?? false
+          stddev: it.stddev ?? '', comments: it.comments ?? '',
+          predecessors: new Set(it.predecessors ?? []), complete: it.complete ?? false
         });
       }
       document.getElementById('proj-name').value = projectName;
