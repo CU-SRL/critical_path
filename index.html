@@ -11,11 +11,12 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:          #000000;
-      --border:      #1e1e1e;
-      --text:        #ffffff;
-      --muted:       #4a4a4a;
-      --dim:         #252525;
+      --bg:     #000000;
+      --border: #1e1e1e;
+      --text:   #ffffff;
+      --muted:  #4a4a4a;
+      --dim:    #252525;
+      --sub:    rgba(255,255,255,0.75);
     }
 
     html, body {
@@ -55,7 +56,7 @@
       color: var(--muted);
     }
 
-    /* ── Scrollable content ── */
+    /* ── Content ── */
     main {
       flex: 1;
       overflow-y: auto;
@@ -68,8 +69,12 @@
       border-collapse: collapse;
     }
 
+    .tbl col.col-toggle { width: 1.75rem; }
+    .tbl col.col-num    { width: 160px; }
+    .tbl col.col-del    { width: 2rem; }
+
     .tbl thead th {
-      padding: 0 0 0.65rem;
+      padding: 0 0 0.65rem 0;
       font-size: 0.58rem;
       font-weight: 400;
       letter-spacing: 0.22em;
@@ -79,25 +84,36 @@
       border-bottom: 1px solid var(--border);
     }
 
-    .tbl thead th + th { padding-left: 2rem; }
-    .tbl thead th:last-child { width: 2rem; }
+    /* Horizontal padding for all non-first cells */
+    .tbl th + th,
+    .tbl td + td { padding-left: 1.5rem; }
 
-    .tbl tbody tr {
-      border-bottom: 1px solid var(--border);
-      animation: rowIn 0.15s ease;
-    }
-
-    @keyframes rowIn {
-      from { opacity: 0; transform: translateY(-4px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
+    .tbl tbody tr { border-bottom: 1px solid var(--border); }
     .tbl tbody tr:hover .del-btn { opacity: 1; }
-
     .tbl td { padding: 0; vertical-align: middle; }
-    .tbl td + td { padding-left: 2rem; }
-    .tbl td:last-child { width: 2rem; text-align: right; }
 
+    /* ── Toggle button ── */
+    .toggle-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 0.75rem;
+      padding: 0;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.25rem;
+      height: 1.25rem;
+      transition: color 0.15s, transform 0.2s ease;
+      transform: rotate(0deg);
+      transform-origin: center;
+    }
+    .toggle-btn:hover { color: var(--text); }
+    .toggle-btn.open  { transform: rotate(90deg); color: var(--text); }
+
+    /* ── Cell inputs ── */
     .cell-input {
       width: 100%;
       background: transparent;
@@ -111,15 +127,43 @@
       padding: 0.8rem 0;
       caret-color: var(--text);
     }
-
     .cell-input::placeholder { color: var(--dim); }
-
-    .cell-input[type="number"] {
-      -moz-appearance: textfield;
-      width: 120px;
-    }
+    .cell-input[type="number"] { -moz-appearance: textfield; }
     .cell-input[type="number"]::-webkit-outer-spin-button,
     .cell-input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    /* ── Sub-row styling ── */
+    .sub-row .cell-input {
+      font-size: 0.8rem;
+      color: var(--sub);
+      padding: 0.65rem 0;
+    }
+    .sub-row .cell-input::placeholder { color: var(--dim); }
+    .sub-row .name-cell { padding-left: 2.75rem; }
+
+    /* ── Add sub-item row ── */
+    .add-sub-row { border-bottom: none; }
+    .add-sub-row td { padding: 0.35rem 0 0.5rem; }
+    .add-sub-row .name-cell { padding-left: 2.75rem; }
+
+    .add-sub-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      font-family: 'Inter', sans-serif;
+      font-weight: 300;
+      font-size: 0.58rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 0;
+      transition: color 0.15s;
+    }
+    .add-sub-btn:hover { color: var(--text); }
+    .add-sub-btn .plus { font-size: 0.9rem; line-height: 1; }
 
     /* ── Delete button ── */
     .del-btn {
@@ -136,12 +180,12 @@
     }
     .del-btn:hover { color: var(--text); }
 
-    /* ── Add row button ── */
+    /* ── Add item button ── */
     .add-btn {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 0.55rem;
-      margin-top: 1.1rem;
+      margin-top: 1.25rem;
       background: none;
       border: none;
       cursor: pointer;
@@ -156,6 +200,13 @@
     }
     .add-btn:hover { color: var(--text); }
     .add-btn .plus { font-size: 1.1rem; font-weight: 300; line-height: 1; }
+
+    /* ── Row entrance ── */
+    @keyframes rowIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    .tbl tbody tr { animation: rowIn 0.15s ease; }
 
     /* ── Footer ── */
     footer {
@@ -172,17 +223,7 @@
       color: var(--muted);
     }
 
-    .footer-left { display: flex; gap: 2rem; align-items: center; }
-
-    .status-dot {
-      display: inline-block;
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: var(--text);
-      margin-right: 0.45rem;
-      animation: blink 2s ease-in-out infinite;
-    }
+    .footer-left { display: flex; gap: 2rem; }
 
     @keyframes blink {
       0%, 100% { opacity: 1; }
@@ -199,8 +240,16 @@
 
   <main>
     <table class="tbl">
+      <colgroup>
+        <col class="col-toggle" />
+        <col />
+        <col class="col-num" />
+        <col class="col-num" />
+        <col class="col-del" />
+      </colgroup>
       <thead>
         <tr>
+          <th></th>
           <th>Item Name</th>
           <th>Duration (days)</th>
           <th>Std Dev (days)</th>
@@ -217,7 +266,6 @@
 
   <footer>
     <div class="footer-left">
-      <span><span class="status-dot"></span>System Ready</span>
       <span>CPM v0.1.0</span>
       <span>Mode: Analysis</span>
     </div>
@@ -226,27 +274,90 @@
 
   <script>
     const tbody = document.getElementById('tbody');
+    let counter = 0;
 
     function addRow() {
+      const id = ++counter;
+
       const tr = document.createElement('tr');
+      tr.className = 'parent-row';
+      tr.dataset.rowId = id;
       tr.innerHTML = `
-        <td><input class="cell-input" type="text"   placeholder="Item name" /></td>
+        <td><button class="toggle-btn" title="Expand sub-items">&#x203A;</button></td>
+        <td class="name-cell"><input class="cell-input" type="text" placeholder="Item name" /></td>
         <td><input class="cell-input" type="number" placeholder="0" min="0" step="0.5" /></td>
         <td><input class="cell-input" type="number" placeholder="0" min="0" step="0.1" /></td>
-        <td><button class="del-btn" title="Remove">×</button></td>
+        <td><button class="del-btn" title="Remove">&#xD7;</button></td>
+      `;
+
+      tr.querySelector('.toggle-btn').addEventListener('click', () => toggleChildren(id));
+      tr.querySelector('.del-btn').addEventListener('click', () => {
+        tbody.querySelectorAll(`[data-parent="${id}"], [data-add-sub-for="${id}"]`).forEach(r => r.remove());
+        tr.remove();
+      });
+
+      // Add-sub row for this parent (hidden until expanded)
+      const addSubTr = document.createElement('tr');
+      addSubTr.className = 'add-sub-row';
+      addSubTr.dataset.addSubFor = id;
+      addSubTr.hidden = true;
+      addSubTr.innerHTML = `
+        <td></td>
+        <td class="name-cell" colspan="3">
+          <button class="add-sub-btn">
+            <span class="plus">+</span>
+            <span>Add Sub-item</span>
+          </button>
+        </td>
+        <td></td>
+      `;
+      addSubTr.querySelector('.add-sub-btn').addEventListener('click', () => addSubRow(id));
+
+      tbody.appendChild(tr);
+      tbody.appendChild(addSubTr);
+      tr.querySelector('.cell-input').focus();
+    }
+
+    function addSubRow(parentId) {
+      const id = ++counter;
+
+      const tr = document.createElement('tr');
+      tr.className = 'sub-row';
+      tr.dataset.rowId = id;
+      tr.dataset.parent = parentId;
+      tr.innerHTML = `
+        <td></td>
+        <td class="name-cell"><input class="cell-input" type="text" placeholder="Sub-item name" /></td>
+        <td><input class="cell-input" type="number" placeholder="0" min="0" step="0.5" /></td>
+        <td><input class="cell-input" type="number" placeholder="0" min="0" step="0.1" /></td>
+        <td><button class="del-btn" title="Remove">&#xD7;</button></td>
       `;
       tr.querySelector('.del-btn').addEventListener('click', () => tr.remove());
-      tbody.appendChild(tr);
+
+      const anchor = tbody.querySelector(`[data-add-sub-for="${parentId}"]`);
+      tbody.insertBefore(tr, anchor);
       tr.querySelector('.cell-input').focus();
+    }
+
+    function toggleChildren(parentId) {
+      const parentRow = tbody.querySelector(`[data-row-id="${parentId}"]`);
+      const btn = parentRow.querySelector('.toggle-btn');
+      const opening = !btn.classList.contains('open');
+
+      tbody.querySelectorAll(`[data-parent="${parentId}"], [data-add-sub-for="${parentId}"]`).forEach(r => {
+        r.hidden = !opening;
+      });
+
+      btn.classList.toggle('open', opening);
     }
 
     document.getElementById('add-btn').addEventListener('click', addRow);
 
-    // Tab out of last cell in last row → new row
+    // Tab from last visible input → new parent row
     tbody.addEventListener('keydown', e => {
       if (e.key !== 'Tab' || e.shiftKey) return;
-      const inputs = [...tbody.querySelectorAll('.cell-input')];
-      if (e.target === inputs[inputs.length - 1]) {
+      const visible = [...tbody.querySelectorAll('.cell-input')].filter(i => !i.closest('tr').hidden);
+      if (visible.length && e.target === visible[visible.length - 1]) {
         e.preventDefault();
         addRow();
       }
