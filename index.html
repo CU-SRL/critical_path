@@ -49,10 +49,15 @@
     .tab-panel.active { display:flex; }
 
     /* ── Items tab ── */
+    .items-toolbar { flex-shrink:0; display:flex; align-items:center; gap:.6rem; padding:.7rem 2.5rem; border-bottom:1px solid var(--brd); }
     .items-scroll { flex:1; overflow-y:auto; padding:0 2.5rem 1rem; }
 
-    .tbl { width:100%; max-width:960px; border-collapse:collapse; }
+    .project-group-row td { padding:1.1rem 0 .4rem; font-size:.56rem; font-weight:400; letter-spacing:.18em; text-transform:uppercase; color:#666; border-bottom:1px solid var(--brd); }
+    .project-group-row:first-child td { padding-top:.6rem; }
+
+    .tbl { width:100%; max-width:1100px; border-collapse:collapse; }
     .tbl col.col-num     { width:110px; }
+    .tbl col.col-project { width:140px; }
     .tbl col.col-pred    { width:185px; }
     .tbl col.col-comment { width:220px; }
     .tbl col.col-icon    { width:1.75rem; }
@@ -188,6 +193,7 @@
     .proj-name-input:focus { color:var(--text); border-bottom-color:#444; }
     .hdr-btn { background:none; border:1px solid var(--brd); color:var(--muted); font-family:'Inter',sans-serif; font-weight:300; font-size:.54rem; letter-spacing:.2em; text-transform:uppercase; padding:.28rem .7rem; cursor:pointer; transition:color .15s,border-color .15s; }
     .hdr-btn:hover { color:var(--text); border-color:#3a3a3a; }
+    .hdr-btn.active { color:var(--text); border-color:#4a4a4a; }
     .user-email { font-size:.56rem; letter-spacing:.05em; color:var(--muted); max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
     /* ── Auth gate ── */
@@ -238,20 +244,24 @@
   <main>
     <!-- Items -->
     <div id="tab-items" class="tab-panel active">
+      <div class="items-toolbar">
+        <button class="hdr-btn" id="group-toggle-btn">Group by Project</button>
+      </div>
       <div class="items-scroll">
         <table class="tbl">
           <colgroup>
             <col class="col-drag"/><col /><col class="col-num"/><col class="col-num"/>
-            <col class="col-pred"/><col class="col-comment"/><col class="col-icon"/><col class="col-icon"/><col class="col-icon"/>
+            <col class="col-project"/><col class="col-pred"/><col class="col-comment"/><col class="col-icon"/><col class="col-icon"/><col class="col-icon"/>
           </colgroup>
           <thead>
             <tr>
               <th></th><th>Item Name</th><th>Duration (days)</th><th>Std Dev (days)</th>
-              <th>Predecessors</th><th>Comments</th><th></th><th></th><th></th>
+              <th>Project</th><th>Predecessors</th><th>Comments</th><th></th><th></th><th></th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
         </table>
+        <datalist id="project-list"></datalist>
       </div>
       <button class="add-item-btn" id="add-btn">
         <span class="plus">+</span><span>Add Item</span>
@@ -521,11 +531,11 @@
     async function addItem() {
       if (!currentProjectId) return;
       const id=genId();
-      items.set(id,{id,name:'',duration:'',stddev:'',comments:'',predecessors:new Set(),complete:false});
+      items.set(id,{id,name:'',duration:'',stddev:'',project:'',comments:'',predecessors:new Set(),complete:false});
       renderTable(); refresh();
       document.querySelector(`[data-id="${id}"][data-field="name"]`)?.focus();
       await setDoc(itemDocRef(currentProjectId,id), {
-        name:'', duration:'', stddev:'', comments:'', predecessors:[], complete:false
+        name:'', duration:'', stddev:'', project:'', comments:'', predecessors:[], complete:false
       });
       writeProjectFields({ order:[...items.keys()] });
     }
@@ -577,23 +587,74 @@
       writeItemFieldNow(id,'complete',it.complete);
     }
 
+    // ── Grouping (sort items by project, soonest-due project/item first) ──────
+    let groupByProject = false;
+
+    function dueDay(id, sched) {
+      const d = sched.targetDays!==null ? sched.lf.get(id) : sched.ef.get(id);
+      return d ?? Infinity;
+    }
+
+    // Groups ids by project name, sorts items within each group by due date
+    // ascending, and sorts the groups themselves by their soonest due item.
+    function groupedRowOrder() {
+      const sched = computeSchedule();
+      const groups = new Map(); // project name -> ids[]
+      for (const [id,item] of items) {
+        const proj = item.project?.trim() || 'No Project';
+        if (!groups.has(proj)) groups.set(proj, []);
+        groups.get(proj).push(id);
+      }
+      for (const ids of groups.values()) ids.sort((a,b)=>dueDay(a,sched)-dueDay(b,sched));
+      const projects = [...groups.keys()].sort((a,b)=>{
+        const da=Math.min(...groups.get(a).map(id=>dueDay(id,sched)));
+        const db=Math.min(...groups.get(b).map(id=>dueDay(id,sched)));
+        return da-db;
+      });
+      return projects.flatMap(proj => groups.get(proj).map(id => ({id, proj})));
+    }
+
+    function updateProjectDatalist() {
+      const dl = document.getElementById('project-list');
+      if (!dl) return;
+      const names = new Set();
+      for (const it of items.values()) if (it.project?.trim()) names.add(it.project.trim());
+      dl.innerHTML = [...names].sort((a,b)=>a.localeCompare(b)).map(n=>`<option value="${esc(n)}"></option>`).join('');
+    }
+
     // ── Table rendering ────────────────────────────────────────────────────────
     function renderTable() {
       const tbody=document.getElementById('tbody');
       tbody.innerHTML='';
-      for (const [id,item] of items) {
+
+      const rows = groupByProject
+        ? groupedRowOrder()
+        : [...items.keys()].map(id => ({id, proj:null}));
+
+      let lastGroup;
+      for (const {id,proj} of rows) {
+        const item=items.get(id); if (!item) continue;
         const isObj=objectiveId===id, isDone=item.complete;
 
+        if (groupByProject && proj!==lastGroup) {
+          lastGroup=proj;
+          const gr=document.createElement('tr');
+          gr.className='project-group-row';
+          gr.innerHTML=`<td colspan="10">${esc(proj)}</td>`;
+          tbody.appendChild(gr);
+        }
+
         const tr=document.createElement('tr');
-        tr.dataset.rowId=id; tr.draggable=true;
+        tr.dataset.rowId=id; tr.draggable=!groupByProject;
         if (isObj)  tr.classList.add('is-objective');
         if (isDone) tr.classList.add('is-complete');
 
         tr.innerHTML=`
-          <td class="drag-handle-cell"><span class="drag-handle">⣿</span></td>
+          <td class="drag-handle-cell">${groupByProject?'':'<span class="drag-handle">⣿</span>'}</td>
           <td><textarea class="cell-input" placeholder="Item name" data-field="name"     data-id="${id}">${esc(item.name)}</textarea></td>
           <td><input class="cell-input" type="number" value="${esc(item.duration)}" placeholder="0" min="0" step="0.5" data-field="duration" data-id="${id}"/></td>
           <td><input class="cell-input" type="number" value="${esc(item.stddev)}"   placeholder="0" min="0" step="0.1" data-field="stddev"   data-id="${id}"/></td>
+          <td><input class="cell-input" type="text" list="project-list" placeholder="Project" value="${esc(item.project||'')}" data-field="project" data-id="${id}"/></td>
           <td><div class="pred-cell" data-pred-for="${id}">${chips(id)}</div></td>
           <td><textarea class="cell-input" placeholder="Notes…" data-field="comments" data-id="${id}">${esc(item.comments)}</textarea></td>
           <td><button class="chk-btn${isDone?' active':''}" data-complete="${id}" title="${isDone?'Mark incomplete':'Mark complete'}">✓</button></td>
@@ -604,14 +665,21 @@
         // Objective date sub-row
         const dr=document.createElement('tr');
         dr.className='obj-date-row'; dr.hidden=!isObj;
-        dr.innerHTML=`<td colspan="9"><div class="obj-date-cell">
+        dr.innerHTML=`<td colspan="10"><div class="obj-date-cell">
           <span class="obj-date-label">Target Date</span>
           <input type="date" class="date-input" data-obj-date="${id}" value="${isObj?objectiveDate:''}"/>
         </div></td>`;
         tbody.appendChild(dr);
       }
+      updateProjectDatalist();
       setTimeout(autoResizeAll, 0);
     }
+
+    document.getElementById('group-toggle-btn').addEventListener('click', e => {
+      groupByProject = !groupByProject;
+      e.currentTarget.classList.toggle('active', groupByProject);
+      renderTable();
+    });
 
     function chips(id) {
       const it=items.get(id); if (!it) return '';
@@ -1013,7 +1081,7 @@
       return {
         version: 1, projectName, objectiveId, objectiveDate,
         items: [...items.values()].map(it => ({
-          id: it.id, name: it.name, duration: it.duration, stddev: it.stddev,
+          id: it.id, name: it.name, duration: it.duration, stddev: it.stddev, project: it.project,
           comments: it.comments, predecessors: [...it.predecessors], complete: it.complete
         }))
       };
@@ -1084,6 +1152,12 @@
         const el = document.querySelector(`[data-id="${id}"][data-field="duration"]`);
         if (el) el.value = d.duration;
       }
+      if (typeof d.project === 'string' && !isFocused(id,'project') && it.project !== d.project) {
+        it.project = d.project;
+        const el = document.querySelector(`[data-id="${id}"][data-field="project"]`);
+        if (el) el.value = d.project;
+        updateProjectDatalist();
+      }
       if (d.stddev !== undefined && !isFocused(id,'stddev') && it.stddev !== d.stddev) {
         it.stddev = d.stddev;
         const el = document.querySelector(`[data-id="${id}"][data-field="stddev"]`);
@@ -1146,7 +1220,7 @@
           const d = ch.doc.data();
           if (!items.has(id)) {
             items.set(id, {
-              id, name: d.name??'', duration: d.duration??'', stddev: d.stddev??'',
+              id, name: d.name??'', duration: d.duration??'', stddev: d.stddev??'', project: d.project??'',
               comments: d.comments??'', predecessors: new Set(d.predecessors??[]), complete: d.complete??false
             });
             structural = true;
@@ -1180,7 +1254,7 @@
         const batch = writeBatch(db);
         for (const it of importedItems) {
           batch.set(doc(itemsColRef(pid), String(it.id)), {
-            name: it.name, duration: it.duration, stddev: it.stddev,
+            name: it.name, duration: it.duration, stddev: it.stddev, project: it.project,
             comments: it.comments, predecessors: it.predecessors, complete: it.complete
           });
         }
@@ -1286,7 +1360,7 @@
         try {
           const data = JSON.parse(ev.target.result);
           const importedItems = (data.items ?? []).map(it => ({
-            id: it.id, name: it.name??'', duration: it.duration??'', stddev: it.stddev??'',
+            id: it.id, name: it.name??'', duration: it.duration??'', stddev: it.stddev??'', project: it.project??'',
             comments: it.comments??'', predecessors: it.predecessors??[], complete: it.complete??false
           }));
           await createNewProject(data.projectName || 'Imported', importedItems, {
