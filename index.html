@@ -1332,6 +1332,8 @@
       return row;
     }
 
+    const DELETE_PASSWORD = 'Sunb3@m2027';
+
     async function refreshOpenPanel() {
       openPanel.innerHTML = '<div class="open-proj-empty">Loading…</div>';
       let snaps;
@@ -1346,7 +1348,9 @@
         openPanel.appendChild(makeOpenRow(data.name || 'Untitled',
           () => { subscribeToProject(snap.id); closeOpenPanel(); },
           async () => {
-            if (!confirm(`Delete "${data.name}" for everyone? This cannot be undone.`)) return;
+            const pw = prompt(`Enter the deletion password to permanently delete "${data.name}" for everyone:`);
+            if (pw === null) return;
+            if (pw !== DELETE_PASSWORD) { alert('Incorrect password — project not deleted.'); return; }
             await deleteProjectDeep(snap.id);
             if (currentProjectId === snap.id) {
               teardownProjectListeners(); items.clear(); renderTable(); refresh();
